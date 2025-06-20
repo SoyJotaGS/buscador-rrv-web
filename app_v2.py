@@ -261,11 +261,11 @@ def mostrar_resultado_con_pegasus(resultado, pegasus_data=None, pegasus_status=N
         col1, col2, col3 = st.columns(3)
         with col1:
             st.write(f"**🚗 PLACA:** {data.get('PLACA', 'N/A')}")
-            st.write(f"**👤 PROPIETARIO:** {data.get('PROPIETARIO', 'N/A')}")
+            st.write(f"**👤 PROYECTO:** {data.get('PROYECTO', 'N/A')}")
         
         with col2:
-            st.write(f"**📍 DISTRITO:** {data.get('DISTRITO', 'N/A')}")
-            st.write(f"**📞 TELÉFONO:** {data.get('TELÉFONO', 'N/A')}")
+            st.write(f"**📍 SISTEMA:** {data.get('SISTEMA', 'N/A')}")
+            st.write(f"**📞 ULTIMO ESTADO:** {data.get('TIPO DE TRABAJO', 'N/A')}")
         
         with col3:
             st.write(f"**🏢 EMPRESA:** {data.get('EMPRESA', 'N/A')}")
@@ -372,8 +372,8 @@ def main():
     with col1:
         termino_busqueda = st.text_input(
             "🔍 **Ingresa la placa a buscar:**",
-            placeholder="Ej: ABC-123, ABC123, ABC",
-            help="Puedes buscar placas completas o parciales"
+            placeholder="Ej: ABC-123",
+            help="Puedes buscar placas completas"
         )
     
     with col2:
