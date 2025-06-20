@@ -345,7 +345,7 @@ def main():
         with col1:
             placa_buscar = st.text_input(
                 "Ingresa la placa a buscar:",
-                placeholder="Ej: ABC123",
+                placeholder="Ej: ABC-123",
                 key="placa_input"
             )
         
