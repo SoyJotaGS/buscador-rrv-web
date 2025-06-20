@@ -104,7 +104,7 @@ class PegasusAPI:
             if response.status_code == 200:
                 data = response.json()
                 # Intentar diferentes nombres de token
-                self.token = data.get('token') or data.get('access_token') or data.get('bearer_token')
+                self.token = data.get('bearer_token')
                 return True, "Autenticación exitosa"
             else:
                 return False, f"Error de autenticación: {response.status_code}"
@@ -124,13 +124,16 @@ class PegasusAPI:
         try:
             headers = {
                 "Authorization": f"Bearer {self.token}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Accept": "*/*",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Connection": "keep-alive"
             }
             
             response = requests.get(
-                f"{self.base_url}/vehicles",
+                f"{self.base_url}/vehicles?",
                 headers=headers,
-                params={"search.info.license_plate": license_plate},
+                params={"search.info.license_plate=": license_plate},
                 timeout=10
             )
             
