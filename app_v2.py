@@ -128,9 +128,9 @@ class PegasusAPI:
             }
             
             response = requests.get(
-                f"{self.base_url}/vehicles?",
+                f"{self.base_url}/vehicles",
                 headers=headers,
-                params={"search.info.license_plate=": license_plate},
+                params={"search.info.license_plate": license_plate},
                 timeout=10
             )
             
