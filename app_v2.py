@@ -128,9 +128,9 @@ class PegasusAPI:
             }
             
             response = requests.get(
-                f"{self.base_url}/vehicles",
+                f"{self.base_url}/vehicles?",
                 headers=headers,
-                params={"search.info.license_plate": license_plate},
+                params={"search.info.license_plate=": license_plate},
                 timeout=10
             )
             
@@ -190,8 +190,7 @@ def buscar_en_hojas_rrv(gc, termino_busqueda):
     """Buscar en las hojas RRV"""
     resultados = []
     hojas_rrv = [
-        "RRV 1", "RRV 2", "RRV 3", "RRV 4", "RRV 5",
-        "RRV 6", "RRV 7", "RRV 8", "RRV 9", "RRV 10"
+        "RRV"
     ]
     
     progress_bar = st.progress(0)
