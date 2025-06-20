@@ -260,16 +260,16 @@ def mostrar_resultado_con_pegasus(resultado, pegasus_data=None, pegasus_status=N
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.write(f"**🚗 PLACA:** {data.get('PLACA', 'N/A')}")
-            st.write(f"**👤 PROYECTO:** {data.get('PROYECTO', 'N/A')}")
+            st.write(f"**✔️ PLACA:** {data.get('PLACA', 'N/A')}")
+            st.write(f"**✔️ PROYECTO:** {data.get('PROYECTO', 'N/A')}")
         
         with col2:
-            st.write(f"**📍 SISTEMA:** {data.get('SISTEMA', 'N/A')}")
-            st.write(f"**📞 ULTIMO ESTADO:** {data.get('TIPO DE TRABAJO', 'N/A')}")
+            st.write(f"**✔️ SISTEMA:** {data.get('SISTEMA', 'N/A')}")
+            st.write(f"**✔️ ULTIMO ESTADO:** {data.get('TIPO DE TRABAJO', 'N/A')}")
         
         with col3:
-            st.write(f"**🏢 EMPRESA:** {data.get('EMPRESA', 'N/A')}")
-            st.write(f"**📅 FECHA:** {data.get('FECHA', 'N/A')}")
+            st.write(f"**✔️ EMPRESA:** {data.get('EMPRESA', 'N/A')}")
+            st.write(f"**✔️ FECHA:** {data.get('FECHA', 'N/A')}")
         
         # Información de Pegasus si está disponible
         if pegasus_data and pegasus_status:
