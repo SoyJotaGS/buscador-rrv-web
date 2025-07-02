@@ -382,7 +382,7 @@ def main():
         flex-direction: column;
         align-items: center;
         width: 100%;
-        min-height: 100vh;
+        min-height: 0vh;
         margin-top: 0 !important;
         padding-top: 0 !important;
     }
