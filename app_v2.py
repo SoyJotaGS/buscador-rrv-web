@@ -399,14 +399,14 @@ def main():
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 1100vw !important;
+        max-width: 1100vw !important;
         overflow-x: hidden !important;
     }
     
     .main-container {
         max-width: 1100px;
-        width: 90vw;
+        width: 900vw;
         margin: 0 auto;
         padding: 1rem 0;
         box-sizing: border-box;
