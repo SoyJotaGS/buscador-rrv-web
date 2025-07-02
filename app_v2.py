@@ -652,6 +652,17 @@ def main():
         display: none !important;
     }
     
+    /* Ocultar cualquier div vacío o con solo espacios en blanco */
+    div:empty,
+    div:not(:has(*)):not(:has(text())),
+    .element-container:empty {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
     /* Eliminar espaciado innecesario entre elementos */
     .element-container {
         margin: 0 !important;
@@ -661,6 +672,27 @@ def main():
     .stMarkdown {
         margin: 0 !important;
         padding: 0 !important;
+    }
+    
+    /* Forzar ocultar contenedores que puedan tener altura pero sin contenido visible */
+    .stApp .element-container:not(:has(.stButton)):not(:has(.stTextInput)):not(:has(.stMarkdown)):not(:has(.stDataFrame)):not(:has(.stExpander)):not(:has(.stAlert)) {
+        display: none !important;
+        height: 0 !important;
+    }
+    
+    /* Regla más específica para contenedores problemáticos */
+    .stApp > div > div > div:empty,
+    .stApp > div > div > div[data-testid]:empty,
+    .block-container > div:empty {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        visibility: hidden !important;
+    }
+    
+    /* Ocultar específicamente elementos con altura pero sin contenido útil */
+    .element-container[style*="height"]:empty {
+        display: none !important;
     }
     </style>
     """
