@@ -374,23 +374,23 @@ class BuscadorPlacasWeb:
             return None
 
 def main():
-    # CSS moderno y elegante SOLO tema oscuro
+    # CSS moderno y elegante SOLO tema oscuro mejorado
     css_tema = """
     <style>
     :root {
-        --bg-primary: #0f1419;
-        --bg-secondary: #1a1f2e;
-        --bg-tertiary: #2d3748;
-        --text-primary: #f7fafc;
-        --text-secondary: #e2e8f0;
-        --text-muted: #a0aec0;
-        --accent-primary: #3182ce;
-        --accent-secondary: #4299e1;
-        --border-color: #4a5568;
-        --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-        --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --bg-primary: #181a20;
+        --bg-secondary: #23262f;
+        --bg-tertiary: #23262f;
+        --text-primary: #f1f1f1;
+        --text-secondary: #b0b3c2;
+        --text-muted: #7a7e8c;
+        --accent-primary: #4f8cff;
+        --accent-secondary: #ff5e62;
+        --border-color: #313442;
+        --shadow-light: 0 2px 8px 0 rgba(0,0,0,0.12);
+        --shadow-medium: 0 6px 24px 0 rgba(0,0,0,0.18);
+        --gradient-primary: linear-gradient(90deg, #4f8cff 0%, #6a82fb 100%);
+        --gradient-secondary: linear-gradient(90deg, #ff5e62 0%, #ff9966 100%);
     }
     body, .stApp {
         background: var(--bg-primary) !important;
@@ -398,7 +398,7 @@ def main():
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
     .main-header {
-        background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
+        background: var(--gradient-primary);
         padding: 1.2rem 1rem;
         border-radius: 12px;
         margin: 0.5rem 0 0.5rem 0;
@@ -422,17 +422,17 @@ def main():
     }
     .search-container, .results-container {
         background: var(--bg-secondary);
-        padding: 2.5rem;
-        border-radius: 16px;
+        padding: 2.2rem 1.5rem;
+        border-radius: 14px;
         box-shadow: var(--shadow-light);
         margin-bottom: 2rem;
         color: var(--text-primary);
         border: 1px solid var(--border-color);
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(6px);
         transition: all 0.3s ease;
     }
     .search-container:hover, .results-container:hover {
-        transform: translateY(-2px);
+        transform: translateY(-1px);
         box-shadow: var(--shadow-medium);
     }
     .stButton > button {
@@ -447,7 +447,7 @@ def main():
         box-shadow: var(--shadow-light) !important;
     }
     .stButton > button:hover {
-        transform: translateY(-2px) !important;
+        transform: translateY(-1px) !important;
         box-shadow: var(--shadow-medium) !important;
     }
     .stTextInput > div > div > input {
@@ -461,7 +461,7 @@ def main():
     }
     .stTextInput > div > div > input:focus {
         border-color: var(--accent-primary) !important;
-        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1) !important;
+        box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.12) !important;
     }
     .stDataFrame, .stTable {
         background: transparent !important;
