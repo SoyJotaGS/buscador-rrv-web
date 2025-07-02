@@ -377,6 +377,13 @@ def main():
     # CSS moderno y elegante SOLO tema oscuro mejorado
     css_tema = """
     <style>
+    .rrv-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        min-height: 100vh;
+    }
     :root {
         --bg-primary: #181a20;
         --bg-secondary: #23262f;
@@ -399,8 +406,8 @@ def main():
     }
     .main-header, .search-container, .status-container, .results-container {
         width: 90vw;
-        max-width: 1200px;
-        margin: 0.5rem auto 0.5rem auto;
+        max-width: 800px;
+        margin: 0.5rem 0;
         display: block;
     }
     .main-header {
@@ -427,7 +434,7 @@ def main():
     }
     .status-container {
         background: var(--bg-secondary);
-        min-height: 60px;
+        min-height: 70px;
         border-radius: 14px;
         box-shadow: var(--shadow-light);
         color: var(--text-primary);
@@ -435,9 +442,10 @@ def main():
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 2rem;
+        margin: 1.2rem 0 1.2rem 0;
         font-size: 1.15rem;
         font-weight: 500;
+        padding: 18px 0;
         transition: all 0.3s ease;
     }
     .search-container, .results-container {
@@ -533,6 +541,8 @@ def main():
     """
     st.markdown(css_tema, unsafe_allow_html=True)
 
+    st.markdown('<div class="rrv-wrapper">', unsafe_allow_html=True)
+
     # Header principal (único)
     st.markdown("""
     <div class="main-header">
@@ -541,20 +551,6 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    # Contenedor de estado (ACTIVO/NO ACTIVO EN PLATAFORMA)
-    show_status = False
-    status_html = ""
-    def etiqueta_rrvsac(valor):
-        if valor == 'ACTIVO':
-            return '<span style="background:#43a047;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
-        else:
-            return '<span style="background:#e53935;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
-
-    if 'rrvsac_status' in locals() and (('buscar_btn' in locals() and buscar_btn) or ('buscar_btn' in globals() and buscar_btn)) and placa_buscar.strip():
-        show_status = True
-        status_html = etiqueta_rrvsac(rrvsac_status)
-    st.markdown(f'<div class="status-container">{status_html if show_status else ""}</div>', unsafe_allow_html=True)
-
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
 
@@ -562,6 +558,7 @@ def main():
     if not app.credenciales_path:
         st.error("❌ No se encontraron credenciales. Contacta al administrador para configurar el acceso.")
         st.info("💡 Para desarrolladores: Configura las credenciales en Streamlit Cloud Secrets o agrega un archivo JSON local.")
+        st.markdown('</div>', unsafe_allow_html=True)
         return
 
     # Buscar Placa
@@ -589,6 +586,18 @@ def main():
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
+
+    # Mostrar SIEMPRE la etiqueta de estado después de buscar
+    def etiqueta_rrvsac(valor):
+        if valor == 'ACTIVO':
+            return '<span style="background:#43a047;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
+        else:
+            return '<span style="background:#e53935;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
+
+    if (('buscar_btn' in locals() and buscar_btn) or ('buscar_btn' in globals() and buscar_btn)) and placa_buscar.strip() and 'rrvsac_status' in locals():
+        st.markdown(f'<div class="status-container">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="status-container"></div>', unsafe_allow_html=True)
 
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales and len(st.session_state.resultados_actuales) > 0:
