@@ -447,19 +447,27 @@ def main():
     rrvsac_status = 'NO ACTIVO'
     if placa_buscar and buscar_btn:
         try:
-            url = f'https://plataforma.rrvsac.com/api/vehicles?search.info.license_plate={placa_buscar.strip()}'
+            url = 'https://plataforma.rrvsac.com/api/vehicles'
+            params = {'search.info.license_plate': placa_buscar.strip()}
             headers = {
                 'authenticate': 'e843453d60c9b826ed4704f77a88ab6fb4bcb9cd88b2ce25e600cd5b',
                 'Accept': '*/*',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Connection': 'keep-alive'
             }
-            response = requests.get(url, headers=headers, timeout=10)
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            
             if response.status_code == 200:
                 data = response.json()
-                if data and 'info' in data and data['info']:
+                # Nueva lógica: si la respuesta contiene un campo "id", se considera activo
+                if data and isinstance(data, dict) and 'id' in data:
                     rrvsac_status = 'ACTIVO'
-        except Exception:
+                else:
+                    rrvsac_status = 'NO ACTIVO'
+            else:
+                rrvsac_status = 'NO ACTIVO'
+        except Exception as e:
+            st.error(f"Error al consultar la API de RRVSAC: {str(e)}")
             rrvsac_status = 'NO ACTIVO'
     
     def etiqueta_rrvsac(valor):
