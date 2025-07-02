@@ -259,11 +259,18 @@ class BuscadorPlacasWeb:
             
             if response.status_code == 200:
                 data = response.json()
-                # Si la respuesta contiene un campo "id", se considera activo
-                if data and isinstance(data, dict) and 'id' in data:
-                    return 'ACTIVO'
-                else:
-                    return 'NO ACTIVO'
+                # Buscar campo 'id' dentro de la estructura 'data'
+                if data and isinstance(data, dict) and 'data' in data:
+                    data_content = data['data']
+                    # Si data es una lista, buscar en el primer elemento
+                    if isinstance(data_content, list) and data_content:
+                        first_item = data_content[0]
+                        if isinstance(first_item, dict) and 'id' in first_item:
+                            return 'ACTIVO'
+                    # Si data es un diccionario, buscar directamente
+                    elif isinstance(data_content, dict) and 'id' in data_content:
+                        return 'ACTIVO'
+                return 'NO ACTIVO'
             else:
                 return 'NO ACTIVO'
         except Exception as e:
