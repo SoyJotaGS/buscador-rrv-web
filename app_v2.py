@@ -407,18 +407,20 @@ def main():
     .main-header, .search-container, .status-container, .results-container {
         width: 90vw;
         max-width: 800px;
-        margin: 0.5rem 0;
+        margin: 0.2rem 0 0.2rem 0;
         display: block;
     }
     .main-header {
         background: var(--gradient-primary);
-        padding: 1.2rem 1rem;
+        padding: 0.6rem 1rem;
         border-radius: 12px;
         text-align: center;
         color: white;
         box-shadow: none;
         position: relative;
         overflow: hidden;
+        margin-top: 0.2rem;
+        margin-bottom: 0.2rem;
     }
     .main-header h1 {
         font-size: 1.3rem;
@@ -434,7 +436,7 @@ def main():
     }
     .status-container {
         background: var(--bg-secondary);
-        min-height: 70px;
+        min-height: 36px;
         border-radius: 14px;
         box-shadow: var(--shadow-light);
         color: var(--text-primary);
@@ -442,10 +444,10 @@ def main():
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 1.2rem 0 1.2rem 0;
+        margin: 0.2rem 0 0.2rem 0;
         font-size: 1.15rem;
         font-weight: 500;
-        padding: 18px 0;
+        padding: 6px 0;
         transition: all 0.3s ease;
     }
     .search-container, .results-container {
@@ -540,16 +542,11 @@ def main():
     </style>
     """
     st.markdown(css_tema, unsafe_allow_html=True)
-
     st.markdown('<div class="rrv-wrapper">', unsafe_allow_html=True)
 
-    # Header principal (único)
-    st.markdown("""
-    <div class="main-header">
-        <h1>🔍 BUSCADOR RRV</h1>
-        <p>Consultas de base de datos y plataforma</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Título y subtítulo sin contenedor visual
+    st.markdown('<h1 style="font-size:1.3rem;font-weight:600;text-align:center;margin-bottom:0.2rem;color:#f1f1f1;">🔍 BUSCADOR RRV</h1>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:1rem;opacity:0.92;font-weight:400;text-align:center;margin-bottom:1.2rem;color:#b0b3c2;">Consultas de base de datos y plataforma</div>', unsafe_allow_html=True)
 
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
@@ -561,8 +558,7 @@ def main():
         st.markdown('</div>', unsafe_allow_html=True)
         return
 
-    # Buscar Placa
-    st.markdown('<div class="search-container">', unsafe_allow_html=True)
+    # Buscador de placas sin contenedor visual
     st.subheader("📋 Buscar Placa")
     placa_buscar = st.text_input(
         "Ingresa la placa a buscar:",
@@ -570,7 +566,6 @@ def main():
         key="placa_input"
     )
     buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # Ejecutar búsquedas en paralelo
     if buscar_btn and placa_buscar.strip():
@@ -587,7 +582,7 @@ def main():
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
 
-    # Mostrar SIEMPRE la etiqueta de estado después de buscar
+    # Mostrar la etiqueta de estado solo si hay búsqueda y estado
     def etiqueta_rrvsac(valor):
         if valor == 'ACTIVO':
             return '<span style="background:#43a047;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
@@ -596,8 +591,6 @@ def main():
 
     if (('buscar_btn' in locals() and buscar_btn) or ('buscar_btn' in globals() and buscar_btn)) and placa_buscar.strip() and 'rrvsac_status' in locals():
         st.markdown(f'<div class="status-container">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
-    else:
-        st.markdown(f'<div class="status-container"></div>', unsafe_allow_html=True)
 
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales and len(st.session_state.resultados_actuales) > 0:
