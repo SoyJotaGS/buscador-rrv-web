@@ -404,19 +404,50 @@ def main():
         overflow-x: hidden !important;
     }
     
+    /* Forzar que todos los contenedores de Streamlit usen el 100% del ancho */
+    .stApp > div {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .stApp > div > div {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .stApp .main {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .stApp .main .block-container {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
     .main-container {
-        width: 100%;
-        margin: 0;
-        padding: 1.5rem 0;
-        box-sizing: border-box;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
+        padding: 1.5rem 0 !important;
+        box-sizing: border-box !important;
     }
     
     .title-section {
         text-align: center;
         margin-bottom: 2rem;
-        padding: 0;
-        width: 100%;
-        margin: 0;
+        padding: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
     }
     
     .rrv-title {
@@ -439,23 +470,24 @@ def main():
     
     .search-section {
         background: var(--bg-secondary);
-        padding: 2rem 0;
+        padding: 2rem 2rem !important;
         border-radius: 0;
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         margin-bottom: 1.5rem;
         backdrop-filter: blur(10px);
-        width: 100%;
-        margin: 0;
-        box-sizing: border-box;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
     }
     
     .status-section {
         display: flex;
         justify-content: center;
-        margin: 1rem 0;
-        width: 100%;
-        margin: 0;
+        margin: 1rem 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
     }
     
     .status-badge {
@@ -480,14 +512,15 @@ def main():
     
     .results-section {
         background: var(--bg-secondary);
-        padding: 2rem 0;
+        padding: 2rem 2rem !important;
         border-radius: 0;
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         backdrop-filter: blur(10px);
-        width: 100%;
-        margin: 0;
-        box-sizing: border-box;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
     }
     
     .stButton > button {
@@ -594,11 +627,24 @@ def main():
         background: var(--accent-secondary);
     }
     
-    /* Eliminar reglas forzadas de 100vw */
-    .stApp > div,
-    .stApp > div > div,
+    /* Forzar que las columnas y otros elementos usen el 100% del ancho */
     .stColumns > div {
-        width: auto !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Forzar ancho completo en inputs y botones */
+    .stTextInput,
+    .stButton {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Asegurar que los DataFrames usen todo el ancho */
+    .stDataFrame {
+        width: 100% !important;
         max-width: 100% !important;
     }
     </style>
