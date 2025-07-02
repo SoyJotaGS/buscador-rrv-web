@@ -402,15 +402,17 @@ def main():
     }
     
     .main-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 1rem;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 1rem 2rem;
     }
     
     .title-section {
         text-align: center;
         margin-bottom: 2rem;
         padding: 0;
+        width: 100%;
     }
     
     .rrv-title {
@@ -439,12 +441,14 @@ def main():
         border: 1px solid var(--border-color);
         margin-bottom: 1.5rem;
         backdrop-filter: blur(10px);
+        width: 100%;
     }
     
     .status-section {
         display: flex;
         justify-content: center;
         margin: 1rem 0;
+        width: 100%;
     }
     
     .status-badge {
@@ -474,6 +478,7 @@ def main():
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         backdrop-filter: blur(10px);
+        width: 100%;
     }
     
     .stButton > button {
@@ -487,6 +492,7 @@ def main():
         transition: all 0.3s ease !important;
         box-shadow: var(--shadow-light) !important;
         width: 100% !important;
+        max-width: 100% !important;
     }
     
     .stButton > button:hover {
@@ -502,6 +508,8 @@ def main():
         padding: 1rem 1.25rem !important;
         font-size: 1rem !important;
         transition: all 0.3s ease !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     
     .stTextInput > div > div > input:focus {
@@ -518,6 +526,8 @@ def main():
         border-radius: 12px !important;
         overflow: hidden !important;
         box-shadow: var(--shadow-light) !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     
     .stExpander {
@@ -526,6 +536,8 @@ def main():
         border: 1px solid var(--border-color) !important;
         margin-bottom: 1rem !important;
         box-shadow: var(--shadow-light) !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     
     .stExpanderHeader {
@@ -539,6 +551,8 @@ def main():
         border-radius: 12px !important;
         border: none !important;
         box-shadow: var(--shadow-light) !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     
     .stMetric {
@@ -546,6 +560,8 @@ def main():
         border-radius: 12px !important;
         padding: 1rem !important;
         border: 1px solid var(--border-color) !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     
     p, h1, h2, h3, h4, h5, h6 {
