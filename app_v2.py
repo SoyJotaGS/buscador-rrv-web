@@ -437,11 +437,11 @@ def main():
     
     .title-section {
         text-align: center;
-        margin-bottom: 2rem;
+        margin: 0 !important;
         padding: 0 !important;
         width: 100vw !important;
         max-width: 100vw !important;
-        margin: 0 !important;
+        margin-bottom: 1rem !important;
     }
     
     .rrv-title {
@@ -660,7 +660,6 @@ def main():
     if not app.credenciales_path:
         st.error("❌ No se encontraron credenciales. Contacta al administrador para configurar el acceso.")
         st.info("💡 Para desarrolladores: Configura las credenciales en Streamlit Cloud Secrets o agrega un archivo JSON local.")
-        st.markdown('</div>', unsafe_allow_html=True)
         return
 
     # Sección de búsqueda
