@@ -491,17 +491,14 @@ def main():
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
     
-    # Inicializar rrvsac_status si no se ha ejecutado la búsqueda
-    if 'rrvsac_status' not in locals():
-        rrvsac_status = 'NO ACTIVO'
-    
     def etiqueta_rrvsac(valor):
         if valor == 'ACTIVO':
             return '<span style="background:#43a047;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
         else:
             return '<span style="background:#e53935;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
 
-    if rrvsac_status:
+    # Mostrar etiqueta de estado solo después de la búsqueda
+    if buscar_btn and placa_buscar.strip() and 'rrvsac_status' in locals():
         st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
 
     # Mostrar resultados si existen
