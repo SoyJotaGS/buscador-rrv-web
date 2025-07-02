@@ -374,51 +374,176 @@ class BuscadorPlacasWeb:
             return None
 
 def main():
-    # Configuración de la página
-    st.set_page_config(
-        page_title="BUSCADOR RRV",
-        page_icon="🔍",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-    
-    # Configuración de la página
-    st.set_page_config(
-        page_title="BUSCADOR RRV",
-        page_icon="🔍",
-        layout="wide",
-        initial_sidebar_state="collapsed"
-    )
-    
-    # Inicializar tema en session_state si no existe
-    if 'tema' not in st.session_state:
-        st.session_state.tema = "oscuro"
-    
+    # CSS moderno y elegante SOLO tema oscuro
+    css_tema = """
+    <style>
+    :root {
+        --bg-primary: #0f1419;
+        --bg-secondary: #1a1f2e;
+        --bg-tertiary: #2d3748;
+        --text-primary: #f7fafc;
+        --text-secondary: #e2e8f0;
+        --text-muted: #a0aec0;
+        --accent-primary: #3182ce;
+        --accent-secondary: #4299e1;
+        --border-color: #4a5568;
+        --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    body, .stApp {
+        background: var(--bg-primary) !important;
+        color: var(--text-primary) !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+    .main-header {
+        background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
+        padding: 1.2rem 1rem;
+        border-radius: 12px;
+        margin: 0.5rem 0 0.5rem 0;
+        text-align: center;
+        color: white;
+        box-shadow: none;
+        position: relative;
+        overflow: hidden;
+    }
+    .main-header h1 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .main-header p {
+        font-size: 1rem;
+        opacity: 0.92;
+        font-weight: 400;
+        margin-bottom: 0;
+    }
+    .search-container, .results-container {
+        background: var(--bg-secondary);
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        margin-bottom: 2rem;
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    .search-container:hover, .results-container:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+    .stButton > button {
+        background: var(--gradient-secondary) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 1.5rem !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+        box-shadow: var(--shadow-light) !important;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: var(--shadow-medium) !important;
+    }
+    .stTextInput > div > div > input {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+        border: 2px solid var(--border-color) !important;
+        border-radius: 12px !important;
+        padding: 1rem !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+    }
+    .stTextInput > div > div > input:focus {
+        border-color: var(--accent-primary) !important;
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1) !important;
+    }
+    .stDataFrame, .stTable {
+        background: transparent !important;
+        color: var(--text-primary) !important;
+    }
+    .stDataFrame > div {
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: var(--shadow-light) !important;
+    }
+    .stExpander {
+        background: var(--bg-secondary) !important;
+        border-radius: 12px !important;
+        border: 1px solid var(--border-color) !important;
+        margin-bottom: 1rem !important;
+    }
+    .stExpanderHeader {
+        color: var(--accent-primary) !important;
+        font-weight: 600 !important;
+        padding: 1rem !important;
+    }
+    .stAlert {
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: var(--shadow-light) !important;
+    }
+    .stMetric {
+        background: var(--bg-secondary) !important;
+        border-radius: 12px !important;
+        padding: 1rem !important;
+        border: 1px solid var(--border-color) !important;
+    }
+    p, h1, h2, h3, h4, h5, h6 {
+        color: var(--text-primary) !important;
+    }
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--accent-primary);
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-secondary);
+    }
+    </style>
+    """
+    st.markdown(css_tema, unsafe_allow_html=True)
+
+    # Header principal
+    st.markdown("""
+    <div class="main-header">
+        <h1>🔍 BUSCADOR RRV</h1>
+        <p>Consultas de base de datos y plataforma</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Branding discreto debajo del header principal
+    st.markdown('''
+    <div style="text-align:center; margin-bottom: 1.2rem; margin-top: -0.5rem;">
+        <span style="font-size:1.05rem; font-weight:600; color:#b3b8c5; letter-spacing:1px;">Buscador RRV</span><br>
+        <span style="font-size:0.95rem; color:#8fa1b3;">Consultas de base de datos y plataforma</span>
+    </div>
+    ''', unsafe_allow_html=True)
+
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
-    
+
     # Verificar credenciales
     if not app.credenciales_path:
         st.error("❌ No se encontraron credenciales. Contacta al administrador para configurar el acceso.")
         st.info("💡 Para desarrolladores: Configura las credenciales en Streamlit Cloud Secrets o agrega un archivo JSON local.")
         return
-    
+
     st.success("✅ Sistema conectado y listo para buscar.")
-    
+
     # Buscar Placa
     st.markdown('<div class="search-container">', unsafe_allow_html=True)
-    row1_col1, row1_col2 = st.columns([6, 1])
-    with row1_col1:
-        st.subheader("📋 Buscar Placa")
-    with row1_col2:
-        # Botón de tema grande y visible, alineado a la derecha
-        if st.button(
-            "🌙" if st.session_state.tema == "claro" else "☀️",
-            help="Cambiar tema",
-            key="theme_toggle",
-            use_container_width=True
-        ):
-            st.session_state.tema = "claro" if st.session_state.tema == "oscuro" else "oscuro"
+    st.subheader("📋 Buscar Placa")
     placa_buscar = st.text_input(
         "Ingresa la placa a buscar:",
         placeholder="Ej: ABC-123",
