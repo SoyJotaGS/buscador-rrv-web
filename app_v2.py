@@ -382,34 +382,33 @@ def main():
         initial_sidebar_state="expanded"
     )
     
-    # Selector de tema en la barra lateral
-    with st.sidebar:
-        st.title("🎨 Configuración")
-        tema = st.selectbox(
-            "Selecciona el tema:",
-            ["🌙 Tema Oscuro", "☀️ Tema Claro"],
-            index=0
-        )
-        
-        st.markdown("---")
-        st.markdown("### 📊 Información")
-        st.markdown("**Sistema de búsqueda de placas**")
-        st.markdown("- Google Sheets")
-        st.markdown("- API RRVSAC")
-        
-        st.markdown("---")
-        st.markdown("### 🔧 Estado del Sistema")
-        if tema == "🌙 Tema Oscuro":
-            st.success("✅ Tema Oscuro Activo")
-        else:
-            st.info("☀️ Tema Claro Activo")
+    # Configuración de la página
+    st.set_page_config(
+        page_title="BUSCADOR RRV",
+        page_icon="🔍",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+    
+    # Botón de cambio de tema en la parte superior
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col1:
+        if st.button("🌙", help="Cambiar a tema oscuro"):
+            st.session_state.tema = "oscuro"
+        if st.button("☀️", help="Cambiar a tema claro"):
+            st.session_state.tema = "claro"
+    
+    # Inicializar tema en session_state si no existe
+    if 'tema' not in st.session_state:
+        st.session_state.tema = "oscuro"
     
     # CSS dinámico según el tema seleccionado
-    if tema == "🌙 Tema Oscuro":
+    if st.session_state.tema == "oscuro":
         css_tema = """
         <style>
         body, .stApp {
             background: #181c23 !important;
+            color: #ffffff !important;
         }
         .main-header {
             background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
@@ -425,17 +424,18 @@ def main():
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
-            color: #fff;
+            color: #ffffff;
         }
         .results-container {
             background: #23272f;
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            color: #fff;
+            color: #ffffff;
         }
         .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
             background: transparent !important;
+            color: #ffffff !important;
         }
         .stButton>button {
             background: #e53935 !important;
@@ -445,18 +445,22 @@ def main():
         }
         .stTextInput>div>input {
             background: #23272f !important;
-            color: #fff !important;
+            color: #ffffff !important;
             border-radius: 8px !important;
         }
         .stAlert {
             border-radius: 8px !important;
+            color: #ffffff !important;
         }
         .stExpanderHeader {
             color: #2196F3 !important;
         }
         .stSelectbox>div>div>div {
             background: #23272f !important;
-            color: #fff !important;
+            color: #ffffff !important;
+        }
+        p, h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
         }
         </style>
         """
@@ -465,6 +469,7 @@ def main():
         <style>
         body, .stApp {
             background: #f8f9fa !important;
+            color: #333333 !important;
         }
         .main-header {
             background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
@@ -480,7 +485,7 @@ def main():
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
-            color: #333;
+            color: #333333;
             border: 1px solid #e0e0e0;
         }
         .results-container {
@@ -488,11 +493,12 @@ def main():
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            color: #333;
+            color: #333333;
             border: 1px solid #e0e0e0;
         }
         .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
             background: transparent !important;
+            color: #333333 !important;
         }
         .stButton>button {
             background: #e53935 !important;
@@ -502,19 +508,23 @@ def main():
         }
         .stTextInput>div>input {
             background: #ffffff !important;
-            color: #333 !important;
+            color: #333333 !important;
             border-radius: 8px !important;
             border: 1px solid #e0e0e0 !important;
         }
         .stAlert {
             border-radius: 8px !important;
+            color: #333333 !important;
         }
         .stExpanderHeader {
             color: #2196F3 !important;
         }
         .stSelectbox>div>div>div {
             background: #ffffff !important;
-            color: #333 !important;
+            color: #333333 !important;
+        }
+        p, h1, h2, h3, h4, h5, h6 {
+            color: #333333 !important;
         }
         </style>
         """
