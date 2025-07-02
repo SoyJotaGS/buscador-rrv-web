@@ -845,7 +845,7 @@ def main():
         st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
 
     # Mostrar resultados si existen
-    if st.session_state.resultados_actuales:
+    if st.session_state.resultados_actuales and len(st.session_state.resultados_actuales) > 0:
         st.markdown('<div class="results-container">', unsafe_allow_html=True)
         col1, col2 = st.columns([2, 1])
         with col1:
