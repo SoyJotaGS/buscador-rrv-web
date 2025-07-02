@@ -399,20 +399,25 @@ def main():
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
         margin: 0 !important;
         padding: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
     }
     
     .main-container {
-        width: 100%;
-        max-width: 100%;
+        width: 100vw;
+        max-width: 100vw;
         margin: 0;
-        padding: 1rem 2rem;
+        padding: 1rem 3rem;
+        box-sizing: border-box;
     }
     
     .title-section {
         text-align: center;
         margin-bottom: 2rem;
         padding: 0;
-        width: 100%;
+        width: 100vw;
+        max-width: 100vw;
     }
     
     .rrv-title {
@@ -435,20 +440,23 @@ def main():
     
     .search-section {
         background: var(--bg-secondary);
-        padding: 2rem;
+        padding: 2rem 3rem;
         border-radius: 16px;
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         margin-bottom: 1.5rem;
         backdrop-filter: blur(10px);
-        width: 100%;
+        width: 100vw;
+        max-width: 100vw;
+        box-sizing: border-box;
     }
     
     .status-section {
         display: flex;
         justify-content: center;
         margin: 1rem 0;
-        width: 100%;
+        width: 100vw;
+        max-width: 100vw;
     }
     
     .status-badge {
@@ -473,12 +481,14 @@ def main():
     
     .results-section {
         background: var(--bg-secondary);
-        padding: 2rem;
+        padding: 2rem 3rem;
         border-radius: 16px;
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         backdrop-filter: blur(10px);
-        width: 100%;
+        width: 100vw;
+        max-width: 100vw;
+        box-sizing: border-box;
     }
     
     .stButton > button {
@@ -487,12 +497,12 @@ def main():
         border: none !important;
         border-radius: 12px !important;
         font-weight: 600 !important;
-        padding: 0.875rem 2rem !important;
+        padding: 0.875rem 3rem !important;
         font-size: 1rem !important;
         transition: all 0.3s ease !important;
         box-shadow: var(--shadow-light) !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
     }
     
     .stButton > button:hover {
@@ -505,11 +515,11 @@ def main():
         color: var(--text-primary) !important;
         border: 2px solid var(--border-color) !important;
         border-radius: 12px !important;
-        padding: 1rem 1.25rem !important;
+        padding: 1rem 2rem !important;
         font-size: 1rem !important;
         transition: all 0.3s ease !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
     }
     
     .stTextInput > div > div > input:focus {
@@ -526,8 +536,8 @@ def main():
         border-radius: 12px !important;
         overflow: hidden !important;
         box-shadow: var(--shadow-light) !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
     }
     
     .stExpander {
@@ -536,8 +546,8 @@ def main():
         border: 1px solid var(--border-color) !important;
         margin-bottom: 1rem !important;
         box-shadow: var(--shadow-light) !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
     }
     
     .stExpanderHeader {
@@ -551,8 +561,8 @@ def main():
         border-radius: 12px !important;
         border: none !important;
         box-shadow: var(--shadow-light) !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
     }
     
     .stMetric {
@@ -560,8 +570,8 @@ def main():
         border-radius: 12px !important;
         padding: 1rem !important;
         border: 1px solid var(--border-color) !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
     }
     
     p, h1, h2, h3, h4, h5, h6 {
@@ -583,6 +593,23 @@ def main():
     
     ::-webkit-scrollbar-thumb:hover {
         background: var(--accent-secondary);
+    }
+    
+    /* Forzar ancho completo en todos los elementos de Streamlit */
+    .stApp > div {
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+    
+    .stApp > div > div {
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+    
+    /* Asegurar que las columnas se estiren */
+    .stColumns > div {
+        width: 100vw !important;
+        max-width: 100vw !important;
     }
     </style>
     """
