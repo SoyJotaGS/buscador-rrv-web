@@ -1,478 +1,567 @@
 import streamlit as st
 import gspread
-import pandas as pd
-import json
 import os
-import tempfile
-from io import BytesIO
-import requests
 from datetime import datetime
+import glob
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+import pandas as pd
+import io
+import json
+import tempfile
 
-# Configuración de la página
-st.set_page_config(
-    page_title="🔍 Buscador RRV Avanzado",
-    page_icon="🔍",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# CSS personalizado
-st.markdown("""
-<style>
-    .main-header {
-        background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
-        padding: 2rem;
-        border-radius: 10px;
-        color: white;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .search-box {
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 10px;
-        border-left: 4px solid #2a5298;
-        margin-bottom: 1rem;
-    }
-    .result-card {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .status-activo {
-        background: #d4edda;
-        color: #155724;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-weight: bold;
-    }
-    .status-inactivo {
-        background: #f8d7da;
-        color: #721c24;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-weight: bold;
-    }
-    .status-no-verificado {
-        background: #fff3cd;
-        color: #856404;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-weight: bold;
-    }
-    .pegasus-section {
-        background: #e8f4f8;
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid #17a2b8;
-        margin-top: 1rem;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-class PegasusAPI:
-    """Clase para manejar la API de Pegasus"""
-    
+class BuscadorPlacasWeb:
     def __init__(self):
-        self.base_url = "https://plataforma.rrvsac.com/api"
-        self.token = None
-        self.username = None
-        self.password = None
+        self.gc = None
+        self.credenciales_path = None
+        if 'resultados_actuales' not in st.session_state:
+            st.session_state.resultados_actuales = []
+        self.detectar_credenciales()
     
-    def set_credentials(self, username, password):
-        """Configurar credenciales"""
-        self.username = username
-        self.password = password
-    
-    def authenticate(self):
-        """Autenticar con la API de Pegasus"""
+    def detectar_credenciales(self):
+        """Detecta credenciales desde secrets o archivo local"""
+        # Primero intentar desde Streamlit secrets (para producción en Streamlit Cloud)
         try:
-            login_data = {
-                "username": self.username,
-                "password": self.password
-            }
-            
-            response = requests.post(
-                f"{self.base_url}/login",
-                json=login_data,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                # Intentar diferentes nombres de token
-                self.token = data.get('bearer_token')
-                return True, "Autenticación exitosa"
-            else:
-                return False, f"Error de autenticación: {response.status_code}"
-                
-        except requests.exceptions.RequestException as e:
-            return False, f"Error de conexión: {str(e)}"
-        except Exception as e:
-            return False, f"Error inesperado: {str(e)}"
+            if hasattr(st, 'secrets') and 'gcp_service_account' in st.secrets:
+                # Crear archivo temporal con las credenciales
+                credentials = dict(st.secrets['gcp_service_account'])
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                    json.dump(credentials, f)
+                    self.credenciales_path = f.name
+                return
+        except Exception:
+            pass
+        
+        # Fallback a archivo local (para desarrollo)
+        archivos_json = glob.glob("*.json")
+        if archivos_json:
+            self.credenciales_path = archivos_json[0]
     
-    def search_vehicle(self, license_plate):
-        """Buscar vehículo en la plataforma Pegasus"""
-        if not self.token:
-            auth_success, auth_message = self.authenticate()
-            if not auth_success:
-                return None, auth_message
+    def conectar_google_sheets(self):
+        """Conecta con Google Sheets"""
+        try:
+            if not self.credenciales_path or not os.path.exists(self.credenciales_path):
+                raise FileNotFoundError("Archivo de conexión no encontrado")
+            
+            self.gc = gspread.service_account(filename=self.credenciales_path)
+            return True
+        except Exception as e:
+            st.error(f"Error de conexión: {str(e)}")
+            return False
+    
+    def buscar_placas_en_drive(self, placa_buscar):
+        """Busca una placa en todas las hojas RRV"""
+        if not self.gc:
+            if not self.conectar_google_sheets():
+                return []
         
         try:
-            headers = {
-                "Authorization": f"Bearer {self.token}",
-                "Content-Type": "application/json",
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Connection": "keep-alive"
-            }
-            
-            response = requests.get(
-                f"{self.base_url}/vehicles?",
-                headers=headers,
-                params={"search.info.license_plate=": license_plate},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                return data, "Búsqueda exitosa"
-            elif response.status_code == 401:
-                # Token expirado, intentar reautenticar
-                auth_success, auth_message = self.authenticate()
-                if auth_success:
-                    return self.search_vehicle(license_plate)  # Reintentar
-                else:
-                    return None, "Token expirado y no se pudo reautenticar"
-            else:
-                return None, f"Error en búsqueda: {response.status_code}"
+            with st.spinner('Buscando en Google Sheets...'):
+                todas_las_hojas = self.gc.openall()
+                hojas_rrv = [hoja for hoja in todas_las_hojas if "RRV" in hoja.title]
                 
-        except requests.exceptions.RequestException as e:
-            return None, f"Error de conexión: {str(e)}"
-        except Exception as e:
-            return None, f"Error inesperado: {str(e)}"
-
-def configurar_credenciales_gspread():
-    """Configurar credenciales de Google Sheets"""
-    try:
-        # Primero intentar con secrets de Streamlit Cloud
-        if 'gcp_service_account' in st.secrets:
-            credentials = st.secrets['gcp_service_account']
-            # Crear archivo temporal con las credenciales
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-                json.dump(dict(credentials), f)
-                return f.name
-        else:
-            # Buscar archivo JSON local
-            json_files = [f for f in os.listdir('.') if f.endswith('.json')]
-            if json_files:
-                return json_files[0]
-            else:
-                st.error("❌ No se encontraron credenciales de Google Sheets")
-                return None
-    except Exception as e:
-        st.error(f"❌ Error configurando credenciales: {e}")
-        return None
-
-def conectar_gspread():
-    """Conectar con Google Sheets"""
-    try:
-        credentials_path = configurar_credenciales_gspread()
-        if credentials_path:
-            gc = gspread.service_account(filename=credentials_path)
-            return gc
-        return None
-    except Exception as e:
-        st.error(f"❌ Error conectando con Google Sheets: {e}")
-        return None
-
-def buscar_en_hojas_rrv(gc, termino_busqueda):
-    """Buscar en las hojas RRV"""
-    resultados = []
-    hojas_rrv = [
-        "RRV"
-    ]
-    
-    progress_bar = st.progress(0)
-    status_text = st.empty()
-    
-    for i, nombre_hoja in enumerate(hojas_rrv):
-        try:
-            status_text.text(f"🔍 Buscando en {nombre_hoja}...")
-            hoja = gc.open(nombre_hoja)
-            
-            for worksheet in hoja.worksheets():
-                try:
-                    datos = worksheet.get_all_records()
-                    df = pd.DataFrame(datos)
-                    
-                    if not df.empty and 'PLACA' in df.columns:
-                        # Búsqueda flexible
-                        mask = df['PLACA'].astype(str).str.contains(
-                            termino_busqueda, case=False, na=False
-                        )
-                        coincidencias = df[mask]
+                if not hojas_rrv:
+                    st.warning("No se encontraron hojas con 'RRV' en el nombre")
+                    return []
+                
+                resultados = []
+                progress_bar = st.progress(0)
+                
+                for idx, hoja in enumerate(hojas_rrv):
+                    try:
+                        worksheets = hoja.worksheets()
                         
-                        for _, fila in coincidencias.iterrows():
-                            resultado = {
-                                'hoja': nombre_hoja,
-                                'pestana': worksheet.title,
-                                'data': fila.to_dict()
-                            }
-                            resultados.append(resultado)
-                            
-                except Exception as e:
-                    continue
+                        for worksheet in worksheets:
+                            try:
+                                data = worksheet.get_all_values()
+                                if not data or len(data) < 2:
+                                    continue
+                                
+                                encabezados = data[0]
+                                filas_datos = data[1:]
+                                
+                                filas_encontradas = self.buscar_placa_en_hoja(
+                                    filas_datos, encabezados, placa_buscar, hoja.title, worksheet.title
+                                )
+                                
+                                if filas_encontradas:
+                                    resultados.extend(filas_encontradas)
+                                    
+                            except Exception as e:
+                                continue
+                                
+                    except Exception as e:
+                        continue
                     
+                    progress_bar.progress((idx + 1) / len(hojas_rrv))
+                
+                progress_bar.empty()
+                return resultados
+                
         except Exception as e:
-            continue
-        
-        progress_bar.progress((i + 1) / len(hojas_rrv))
+            st.error(f"Error durante la búsqueda: {str(e)}")
+            return []
     
-    progress_bar.empty()
-    status_text.empty()
+    def buscar_placa_en_hoja(self, filas_datos, encabezados, placa_buscar, nombre_spreadsheet, nombre_worksheet):
+        """Busca una placa en una hoja específica"""
+        resultados = []
+        
+        # Buscar columnas de placa
+        columnas_placa = []
+        for i, encabezado in enumerate(encabezados):
+            encabezado_lower = str(encabezado).lower()
+            if any(palabra in encabezado_lower for palabra in ['placa', 'patente', 'matricula', 'vehiculo', 'numero de vehiculo']):
+                columnas_placa.append(i)
+        
+        if not columnas_placa:
+            columnas_placa = list(range(min(3, len(encabezados))))
+        
+        # Buscar la placa
+        for num_fila, fila in enumerate(filas_datos, start=2):
+            for col_placa in columnas_placa:
+                if col_placa < len(fila):
+                    valor_celda = str(fila[col_placa]).strip()
+                    if placa_buscar.upper() in valor_celda.upper():
+                        # Encontrar columnas específicas
+                        fecha_col = self.encontrar_columna_fecha(encabezados)
+                        proyecto_col = self.encontrar_columna_proyecto(encabezados)
+                        empresa_col = self.encontrar_columna_empresa(encabezados)
+                        sistema_col = self.encontrar_columna_sistema(encabezados)
+                        trabajo_col = self.encontrar_columna_trabajo(encabezados)
+                        
+                        resultado = {
+                            'hoja': nombre_spreadsheet,
+                            'pestana': nombre_worksheet,
+                            'fila': num_fila,
+                            'placa': valor_celda,
+                            'fecha': fila[fecha_col] if fecha_col < len(fila) else "No disponible",
+                            'proyecto': fila[proyecto_col] if proyecto_col < len(fila) else "No disponible",
+                            'empresa': fila[empresa_col] if empresa_col < len(fila) else "No disponible",
+                            'sistema': fila[sistema_col] if sistema_col < len(fila) else "No disponible",
+                            'trabajo': fila[trabajo_col] if trabajo_col < len(fila) else "No disponible",
+                            'datos_completos': fila,
+                            'encabezados': encabezados
+                        }
+                        resultados.append(resultado)
+                        break
+        
+        return resultados
     
-    return resultados
-
-def mostrar_resultado_con_pegasus(resultado, pegasus_data=None, pegasus_status=None):
-    """Mostrar resultado enriquecido con datos de Pegasus"""
+    def encontrar_columna_fecha(self, encabezados):
+        for i, encabezado in enumerate(encabezados):
+            encabezado_lower = str(encabezado).lower()
+            if any(palabra in encabezado_lower for palabra in ['fecha', 'date', 'dia', 'hora', 'fecha de ingreso']):
+                return i
+        return 1 if len(encabezados) > 1 else 0
     
-    with st.container():
-        col1, col2 = st.columns([3, 1])
-        
-        with col1:
-            st.markdown(f"**📋 {resultado['hoja']} - {resultado['pestana']}**")
-        
-        with col2:
-            if pegasus_status is not None:
-                if pegasus_status:
-                    st.markdown('<span class="status-activo">✅ ACTIVO EN PLATAFORMA</span>', 
-                              unsafe_allow_html=True)
-                else:
-                    st.markdown('<span class="status-inactivo">❌ NO ENCONTRADO EN PLATAFORMA</span>', 
-                              unsafe_allow_html=True)
-            else:
-                st.markdown('<span class="status-no-verificado">⚠️ NO VERIFICADO</span>', 
-                          unsafe_allow_html=True)
-        
-        # Datos principales
-        data = resultado['data']
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.write(f"**✔️ PLACA:** {data.get('PLACA', 'N/A')}")
-            st.write(f"**✔️ PROYECTO:** {data.get('PROYECTO', 'N/A')}")
-        
-        with col2:
-            st.write(f"**✔️ SISTEMA:** {data.get('SISTEMA', 'N/A')}")
-            st.write(f"**✔️ ULTIMO ESTADO:** {data.get('TIPO DE TRABAJO', 'N/A')}")
-        
-        with col3:
-            st.write(f"**✔️ EMPRESA:** {data.get('EMPRESA', 'N/A')}")
-            st.write(f"**✔️ FECHA:** {data.get('FECHA', 'N/A')}")
-        
-        # Información de Pegasus si está disponible
-        if pegasus_data and pegasus_status:
-            with st.expander("🔍 Información adicional de Plataforma Pegasus"):
-                st.json(pegasus_data)
-        
-        st.markdown("---")
-
-def exportar_a_excel_avanzado(resultados, pegasus_results=None):
-    """Exportar resultados a Excel con información de Pegasus"""
-    try:
-        # Preparar datos para export
-        datos_export = []
-        
-        for i, resultado in enumerate(resultados):
-            fila = resultado['data'].copy()
-            fila['FUENTE_HOJA'] = resultado['hoja']
-            fila['FUENTE_PESTANA'] = resultado['pestana']
+    def encontrar_columna_proyecto(self, encabezados):
+        for i, encabezado in enumerate(encabezados):
+            encabezado_lower = str(encabezado).lower()
+            if 'proyecto' in encabezado_lower:
+                return i
+        return 2 if len(encabezados) > 2 else 0
+    
+    def encontrar_columna_empresa(self, encabezados):
+        for i, encabezado in enumerate(encabezados):
+            encabezado_lower = str(encabezado).lower()
+            if any(palabra in encabezado_lower for palabra in ['empresa', 'nombre', 'cliente']):
+                return i
+        return 3 if len(encabezados) > 3 else 0
+    
+    def encontrar_columna_sistema(self, encabezados):
+        for i, encabezado in enumerate(encabezados):
+            encabezado_lower = str(encabezado).lower()
+            if 'sistema' in encabezado_lower:
+                return i
+        return 4 if len(encabezados) > 4 else 0
+    
+    def encontrar_columna_trabajo(self, encabezados):
+        for i, encabezado in enumerate(encabezados):
+            encabezado_lower = str(encabezado).lower()
+            if any(palabra in encabezado_lower for palabra in ['tipo de trabajo', 'estado', 'status', 'situacion', 'condicion']):
+                return i
+        return 5 if len(encabezados) > 5 else 0
+    
+    def ordenar_resultados_cronologicamente(self, resultados):
+        """Ordena los resultados por fecha de manera cronológica"""
+        def parsear_fecha(fecha_str):
+            """Intenta parsear diferentes formatos de fecha"""
+            if not fecha_str or fecha_str == "No disponible":
+                return datetime.min
             
-            # Agregar información de Pegasus si está disponible
-            if pegasus_results and i < len(pegasus_results):
-                pegasus_info = pegasus_results[i]
-                fila['PEGASUS_STATUS'] = "ACTIVO" if pegasus_info['found'] else "NO ENCONTRADO"
-                fila['PEGASUS_VERIFICADO'] = "SÍ"
-                if pegasus_info['found'] and pegasus_info['data']:
-                    fila['PEGASUS_INFO'] = str(pegasus_info['data'])
-            else:
-                fila['PEGASUS_STATUS'] = "NO VERIFICADO"
-                fila['PEGASUS_VERIFICADO'] = "NO"
+            fecha_str = str(fecha_str).strip()
             
-            datos_export.append(fila)
+            # Limpiar la fecha de caracteres extra
+            fecha_str = fecha_str.replace('  ', ' ').strip()
+            
+            # Formatos comunes de fecha (ordenados de más específico a más general)
+            formatos = [
+                '%d/%m/%Y %H:%M:%S',
+                '%d/%m/%Y %H:%M',
+                '%d/%m/%Y',
+                '%Y-%m-%d %H:%M:%S',
+                '%Y-%m-%d %H:%M',
+                '%Y-%m-%d',
+                '%d-%m-%Y %H:%M:%S',
+                '%d-%m-%Y %H:%M',
+                '%d-%m-%Y',
+                '%m/%d/%Y %H:%M:%S',
+                '%m/%d/%Y %H:%M',
+                '%m/%d/%Y',
+                '%d/%m/%y %H:%M:%S',
+                '%d/%m/%y %H:%M',
+                '%d/%m/%y',
+                '%d.%m.%Y %H:%M:%S',
+                '%d.%m.%Y %H:%M',
+                '%d.%m.%Y'
+            ]
+            
+            for formato in formatos:
+                try:
+                    return datetime.strptime(fecha_str, formato)
+                except ValueError:
+                    continue
+            
+            # Si no se puede parsear, intentar con dateutil
+            try:
+                from dateutil import parser
+                return parser.parse(fecha_str)
+            except:
+                pass
+            
+            # Si no se puede parsear, devolver fecha mínima
+            return datetime.min
         
-        df_export = pd.DataFrame(datos_export)
+        # Ordenar por fecha (más reciente primero)
+        resultados_ordenados = sorted(
+            resultados, 
+            key=lambda x: parsear_fecha(x['fecha']), 
+            reverse=True
+        )
         
-        # Crear archivo Excel
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df_export.to_excel(writer, sheet_name='Resultados_RRV_Avanzado', index=False)
-        
-        output.seek(0)
-        return output.getvalue()
-        
-    except Exception as e:
-        st.error(f"❌ Error exportando: {e}")
-        return None
+        return resultados_ordenados
+    
+    def crear_excel_bytes(self, resultado):
+        """Crea un archivo Excel en memoria y devuelve los bytes"""
+        try:
+            wb = Workbook()
+            ws = wb.active
+            ws.title = f"Placa {resultado['placa']}"
+            
+            # Estilos
+            titulo_font = Font(name='Arial', size=14, bold=True, color='FFFFFF')
+            subtitulo_font = Font(name='Arial', size=12, bold=True)
+            normal_font = Font(name='Arial', size=10)
+            
+            titulo_fill = PatternFill(start_color='2196F3', end_color='2196F3', fill_type='solid')
+            subtitulo_fill = PatternFill(start_color='E3F2FD', end_color='E3F2FD', fill_type='solid')
+            
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            
+            # Título principal
+            ws['A1'] = f"INFORMACIÓN DE LA PLACA: {resultado['placa']}"
+            ws['A1'].font = titulo_font
+            ws['A1'].fill = titulo_fill
+            ws.merge_cells('A1:C1')
+            ws['A1'].alignment = Alignment(horizontal='center')
+            
+            # Información de ubicación
+            ws['A3'] = "UBICACIÓN DEL REGISTRO"
+            ws['A3'].font = subtitulo_font
+            ws['A3'].fill = subtitulo_fill
+            ws['A3'].border = border
+            
+            ws['A4'] = "Hoja:"
+            ws['B4'] = resultado['hoja']
+            ws['A5'] = "Pestaña:"
+            ws['B5'] = resultado['pestana']
+            ws['A6'] = "Fila:"
+            ws['B6'] = resultado['fila']
+            
+            # Aplicar estilos a la información de ubicación
+            for row in range(4, 7):
+                ws[f'A{row}'].font = normal_font
+                ws[f'A{row}'].border = border
+                ws[f'B{row}'].font = normal_font
+                ws[f'B{row}'].border = border
+            
+            # Datos completos de la fila
+            ws['A8'] = "DATOS COMPLETOS DE LA FILA"
+            ws['A8'].font = subtitulo_font
+            ws['A8'].fill = subtitulo_fill
+            ws['A8'].border = border
+            ws.merge_cells('A8:C8')
+            
+            # Encabezados de la tabla de datos
+            ws['A9'] = "Campo"
+            ws['B9'] = "Valor"
+            ws['A9'].font = subtitulo_font
+            ws['B9'].font = subtitulo_font
+            ws['A9'].fill = subtitulo_fill
+            ws['B9'].fill = subtitulo_fill
+            ws['A9'].border = border
+            ws['B9'].border = border
+            
+            # Insertar todos los datos de la fila
+            row_num = 10
+            for encabezado, valor in zip(resultado['encabezados'], resultado['datos_completos']):
+                ws[f'A{row_num}'] = encabezado
+                ws[f'B{row_num}'] = valor
+                ws[f'A{row_num}'].font = normal_font
+                ws[f'B{row_num}'].font = normal_font
+                ws[f'A{row_num}'].border = border
+                ws[f'B{row_num}'].border = border
+                row_num += 1
+            
+            # Información del archivo
+            ws[f'A{row_num + 1}'] = f"Archivo generado el: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+            ws[f'A{row_num + 1}'].font = Font(name='Arial', size=9, italic=True)
+            
+            # Ajustar ancho de columnas
+            ws.column_dimensions['A'].width = 25
+            ws.column_dimensions['B'].width = 40
+            ws.column_dimensions['C'].width = 15
+            
+            # Guardar en memoria
+            output = io.BytesIO()
+            wb.save(output)
+            wb.close()
+            
+            return output.getvalue()
+            
+        except Exception as e:
+            st.error(f"Error al crear archivo Excel: {str(e)}")
+            return None
 
 def main():
+    # Configuración de la página
+    st.set_page_config(
+        page_title="BUSCADOR RRV",
+        page_icon="🔍",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+    
+    # CSS personalizado para mejorar el diseño
+    st.markdown("""
+    <style>
+    .main-header {
+        background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        text-align: center;
+        color: white;
+    }
+    .search-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    .results-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Header principal
     st.markdown("""
     <div class="main-header">
-        <h1>🔍 Buscador RRV Avanzado</h1>
-        <p>Búsqueda integrada en Google Sheets + Plataforma Pegasus</p>
+        <h1>🔍 BUSCADOR RRV</h1>
+        <p>Sistema de búsqueda de placas en Google Sheets</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar para configuración
-    with st.sidebar:
-        st.header("⚙️ Configuración")
+    # Inicializar la aplicación
+    app = BuscadorPlacasWeb()
+    
+    # Verificar credenciales
+    if not app.credenciales_path:
+        st.error("❌ No se encontraron credenciales. Contacta al administrador para configurar el acceso.")
+        st.info("💡 Para desarrolladores: Configura las credenciales en Streamlit Cloud Secrets o agrega un archivo JSON local.")
+        return
+    
+    st.success("✅ Sistema conectado y listo para buscar.")
+    
+    # Container de búsqueda
+    with st.container():
+        st.markdown('<div class="search-container">', unsafe_allow_html=True)
         
-        # Configuración de Pegasus
-        st.subheader("🔐 Credenciales Pegasus")
-        use_pegasus = st.checkbox("Usar integración con Pegasus", value=False)
+        st.subheader("📋 Buscar Placa")
         
-        pegasus_api = None
-        if use_pegasus:
-            username = st.text_input("Usuario Pegasus", placeholder="tu_usuario")
-            password = st.text_input("Contraseña Pegasus", type="password", placeholder="tu_contraseña")
-            
-            if username and password:
-                pegasus_api = PegasusAPI()
-                pegasus_api.set_credentials(username, password)
-                
-                # Probar conexión
-                if st.button("🔍 Probar conexión Pegasus"):
-                    with st.spinner("Probando conexión..."):
-                        success, message = pegasus_api.authenticate()
-                        if success:
-                            st.success("✅ Conexión exitosa")
-                        else:
-                            st.error(f"❌ {message}")
-            else:
-                st.info("Ingresa usuario y contraseña para habilitar Pegasus")
+        col1, col2 = st.columns([3, 1])
         
-        st.markdown("---")
+        with col1:
+            placa_buscar = st.text_input(
+                "Ingresa la placa a buscar:",
+                placeholder="Ej: ABC-123",
+                key="placa_input"
+            )
         
-        # Información
-        st.subheader("ℹ️ Información")
-        st.info("**Búsqueda en:**\n- 10 Hojas RRV en Google Sheets\n- Plataforma Pegasus (opcional)")
+        with col2:
+            st.write("")  # Espaciado
+            buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
         
-        if use_pegasus and pegasus_api:
-            st.success("🚀 Modo avanzado activado")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Ejecutar búsqueda
+    if buscar_btn and placa_buscar.strip():
+        resultados = app.buscar_placas_en_drive(placa_buscar.strip())
+        # Ordenar resultados cronológicamente (más reciente primero)
+        resultados_ordenados = app.ordenar_resultados_cronologicamente(resultados)
+        st.session_state.resultados_actuales = resultados_ordenados
+        
+        if not resultados_ordenados:
+            st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
-            st.warning("📊 Solo Google Sheets")
+            st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s) ordenados cronológicamente")
     
-    # Área principal de búsqueda
-    st.markdown('<div class="search-box">', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
-        termino_busqueda = st.text_input(
-            "🔍 **Ingresa la placa a buscar:**",
-            placeholder="Ej: ABC-123",
-            help="Puedes buscar placas completas"
+    # Mostrar resultados si existen
+    if st.session_state.resultados_actuales:
+        st.markdown('<div class="results-container">', unsafe_allow_html=True)
+        
+        # Header de resultados
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            st.subheader("📊 Resultados Encontrados (Ordenados Cronológicamente)")
+        
+        with col2:
+            st.metric("Total Registros", len(st.session_state.resultados_actuales))
+        
+        # Resumen cronológico
+        if len(st.session_state.resultados_actuales) > 1:
+            primer_registro = st.session_state.resultados_actuales[0]
+            ultimo_registro = st.session_state.resultados_actuales[-1]
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("📅 Registro Más Reciente", primer_registro['fecha'])
+            with col2:
+                st.metric("📅 Registro Más Antiguo", ultimo_registro['fecha'])
+            with col3:
+                # Calcular diferencia de tiempo si es posible
+                try:
+                    fecha_reciente = datetime.strptime(primer_registro['fecha'], '%d/%m/%Y %H:%M:%S')
+                    fecha_antigua = datetime.strptime(ultimo_registro['fecha'], '%d/%m/%Y %H:%M:%S')
+                    diferencia = fecha_reciente - fecha_antigua
+                    st.metric("⏱️ Rango Temporal", f"{diferencia.days} días")
+                except:
+                    st.metric("⏱️ Rango Temporal", "No calculable")
+        
+        # Crear DataFrame para mostrar los resultados
+        df_resultados = pd.DataFrame([
+            {
+                'FECHA': resultado['fecha'],
+                'PLACA': resultado['placa'],
+                'EMPRESA': resultado['empresa'],
+                'ÚLTIMO ESTADO': resultado['trabajo'],
+                'SERVICIO': resultado['pestana'],
+                'HOJA': resultado['hoja']
+            }
+            for resultado in st.session_state.resultados_actuales
+        ])
+        
+        # Mostrar tabla
+        st.dataframe(
+            df_resultados,
+            use_container_width=True,
+            hide_index=True
         )
-    
-    with col2:
-        st.write("")  # Espacio
-        buscar = st.button("🚀 BUSCAR", use_container_width=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Búsqueda y resultados
-    if buscar and termino_busqueda:
-        # Conectar con Google Sheets
-        gc = conectar_gspread()
         
-        if gc:
-            # Buscar en Google Sheets
-            st.subheader("📊 Resultados de Google Sheets")
-            resultados = buscar_en_hojas_rrv(gc, termino_busqueda)
+        # Línea de tiempo cronológica
+        st.subheader("📅 Línea de Tiempo Cronológica")
+        
+        # Crear una línea de tiempo visual
+        timeline_html = """
+        <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+            <h4 style="color: #2196F3; margin-bottom: 15px;">🕒 Orden Cronológico de Registros</h4>
+        """
+        
+        for i, resultado in enumerate(st.session_state.resultados_actuales):
+            fecha_formateada = resultado['fecha'] if resultado['fecha'] != "No disponible" else "Fecha no disponible"
+            icono = "🟢" if i == 0 else "🔵"
+            timeline_html += f"""
+            <div style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: white; border-radius: 5px; border-left: 4px solid #2196F3;">
+                <span style="font-size: 20px; margin-right: 15px;">{icono}</span>
+                <div>
+                    <strong>Registro #{i+1}</strong> - {fecha_formateada}<br>
+                    <small style="color: #666;">Placa: {resultado['placa']} | Empresa: {resultado['empresa']} | Estado: {resultado['trabajo']}</small>
+                </div>
+            </div>
+            """
+        
+        timeline_html += "</div>"
+        st.markdown(timeline_html, unsafe_allow_html=True)
+        
+        # Mostrar detalles expandibles
+        st.subheader("🔍 Detalles Completos (Ordenados por Fecha)")
+        
+        for i, resultado in enumerate(st.session_state.resultados_actuales):
+            # Determinar el orden cronológico
+            orden_cronologico = "🕒 Más Reciente" if i == 0 else f"📅 Registro #{i+1}"
             
-            if resultados:
-                st.success(f"✅ Se encontraron {len(resultados)} coincidencias")
+            with st.expander(f"{orden_cronologico} - Placa: {resultado['placa']} ({resultado['fecha']})"):
                 
-                # Buscar en Pegasus si está habilitado
-                pegasus_results = []
-                if use_pegasus and pegasus_api and pegasus_api.username:
-                    st.subheader("🔍 Verificación en Plataforma Pegasus")
-                    
-                    for resultado in resultados:
-                        placa = resultado['data'].get('PLACA', '')
-                        if placa:
-                            with st.spinner(f"Consultando {placa} en Pegasus..."):
-                                pegasus_data, pegasus_message = pegasus_api.search_vehicle(placa)
-                                pegasus_found = pegasus_data is not None
-                                pegasus_results.append({
-                                    'found': pegasus_found,
-                                    'data': pegasus_data,
-                                    'message': pegasus_message
-                                })
-                        else:
-                            pegasus_results.append({
-                                'found': False,
-                                'data': None,
-                                'message': 'Placa no disponible'
-                            })
+                # Información básica
+                col1, col2 = st.columns(2)
                 
-                # Mostrar resultados
-                st.subheader("📋 Resultados Detallados")
+                with col1:
+                    st.markdown("**📍 Ubicación del Registro**")
+                    st.write(f"**Hoja:** {resultado['hoja']}")
+                    st.write(f"**Pestaña:** {resultado['pestana']}")
+                    st.write(f"**Fila:** {resultado['fila']}")
                 
-                for i, resultado in enumerate(resultados):
-                    pegasus_info = pegasus_results[i] if pegasus_results else None
-                    pegasus_status = pegasus_info['found'] if pegasus_info else None
-                    pegasus_data = pegasus_info['data'] if pegasus_info and pegasus_info['found'] else None
-                    
-                    mostrar_resultado_con_pegasus(resultado, pegasus_data, pegasus_status)
+                with col2:
+                    st.markdown("**📊 Información Principal**")
+                    st.write(f"**Placa:** {resultado['placa']}")
+                    st.write(f"**Fecha:** {resultado['fecha']}")
+                    st.write(f"**Empresa:** {resultado['empresa']}")
+                    st.write(f"**Estado:** {resultado['trabajo']}")
                 
-                # Botón de exportación
-                st.subheader("📥 Exportar Resultados")
+                # Todos los datos de la fila
+                st.markdown("**📄 Datos Completos de la Fila**")
                 
-                excel_data = exportar_a_excel_avanzado(resultados, pegasus_results if pegasus_results else None)
+                # Crear DataFrame con todos los datos
+                df_detalle = pd.DataFrame({
+                    'Campo': resultado['encabezados'],
+                    'Valor': resultado['datos_completos']
+                })
                 
-                if excel_data:
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    filename = f"busqueda_rrv_avanzado_{termino_busqueda}_{timestamp}.xlsx"
-                    
+                st.dataframe(df_detalle, use_container_width=True, hide_index=True)
+                
+                # Botón de descarga individual
+                excel_bytes = app.crear_excel_bytes(resultado)
+                if excel_bytes:
                     st.download_button(
-                        label="📥 Descargar Excel Completo",
-                        data=excel_data,
-                        file_name=filename,
+                        label=f"📥 Descargar Excel - Placa {resultado['placa']}",
+                        data=excel_bytes,
+                        file_name=f"placa_{resultado['placa']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        use_container_width=True
+                        key=f"download_{i}"
                     )
-                    
-                    st.info("💡 El archivo Excel incluye toda la información encontrada + verificación Pegasus")
-                    
-            else:
-                st.warning(f"⚠️ No se encontraron resultados para: **{termino_busqueda}**")
-                st.info("💡 Intenta con:")
-                st.write("- Solo números: `123`")
-                st.write("- Solo letras: `ABC`") 
-                st.write("- Combinación: `ABC123`")
         
-        else:
-            st.error("❌ No se pudo conectar con Google Sheets")
-            st.info("🔧 Verifica que las credenciales estén configuradas correctamente")
-    
-    elif buscar and not termino_busqueda:
-        st.warning("⚠️ Por favor ingresa una placa para buscar")
+        st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer
     st.markdown("---")
-    st.markdown("""
-    <div style='text-align: center; color: #666; padding: 1rem;'>
-        🔍 <strong>Buscador RRV Avanzado</strong> | 
-        📊 Google Sheets + 🚀 Plataforma Pegasus | 
-        Desarrollado con ❤️ usando Streamlit
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        "<div style='text-align: center; color: #666; font-size: 0.9em;'>"
+        f"🕒 Última actualización: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | "
+        "🔗 Ejecutándose en GitHub Codespaces"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
 if __name__ == "__main__":
-    main() 
+    main()
