@@ -390,141 +390,407 @@ def main():
         initial_sidebar_state="collapsed"
     )
     
-    # Botón de cambio de tema en la parte superior
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col1:
-        if st.button("🌙", help="Cambiar a tema oscuro"):
-            st.session_state.tema = "oscuro"
-        if st.button("☀️", help="Cambiar a tema claro"):
-            st.session_state.tema = "claro"
-    
     # Inicializar tema en session_state si no existe
     if 'tema' not in st.session_state:
         st.session_state.tema = "oscuro"
     
-    # CSS dinámico según el tema seleccionado
+    # Botón toggle de tema moderno
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col1:
+        if st.button(
+            "🌙" if st.session_state.tema == "claro" else "☀️",
+            help="Cambiar tema",
+            key="theme_toggle"
+        ):
+            st.session_state.tema = "claro" if st.session_state.tema == "oscuro" else "oscuro"
+    
+    # CSS moderno y elegante con temas claro y oscuro
     if st.session_state.tema == "oscuro":
         css_tema = """
         <style>
-        body, .stApp {
-            background: #181c23 !important;
-            color: #ffffff !important;
+        /* Variables CSS para tema oscuro */
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a1f2e;
+            --bg-tertiary: #2d3748;
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #a0aec0;
+            --accent-primary: #3182ce;
+            --accent-secondary: #4299e1;
+            --border-color: #4a5568;
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
+        
+        /* Estilos base */
+        body, .stApp {
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+        
+        /* Header principal moderno */
         .main-header {
-            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
+            background: var(--gradient-primary);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            margin: 1rem 0 2rem 0;
             text-align: center;
             color: white;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
         }
-        .search-container {
-            background: #23272f;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        
+        .main-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .main-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        /* Contenedores modernos */
+        .search-container, .results-container {
+            background: var(--bg-secondary);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
             margin-bottom: 2rem;
-            color: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
-        .results-container {
-            background: #23272f;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            color: #ffffff;
+        
+        .search-container:hover, .results-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
         }
-        .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
+        
+        /* Botones modernos */
+        .stButton > button {
+            background: var(--gradient-secondary) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            padding: 0.75rem 1.5rem !important;
+            font-size: 1rem !important;
+            transition: all 0.3s ease !important;
+            box-shadow: var(--shadow-light) !important;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-medium) !important;
+        }
+        
+        /* Botón de tema */
+        .stButton > button[key="theme_toggle"] {
+            background: var(--bg-tertiary) !important;
+            border: 2px solid var(--accent-primary) !important;
+            border-radius: 50px !important;
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 1.5rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 1rem 0 !important;
+        }
+        
+        /* Campos de entrada modernos */
+        .stTextInput > div > div > input {
+            background: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border: 2px solid var(--border-color) !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+            font-size: 1rem !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            border-color: var(--accent-primary) !important;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1) !important;
+        }
+        
+        /* Tablas y dataframes */
+        .stDataFrame, .stTable {
             background: transparent !important;
-            color: #ffffff !important;
+            color: var(--text-primary) !important;
         }
-        .stButton>button {
-            background: #e53935 !important;
-            color: #fff !important;
-            border-radius: 8px !important;
-            font-weight: bold;
+        
+        .stDataFrame > div {
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            box-shadow: var(--shadow-light) !important;
         }
-        .stTextInput>div>input {
-            background: #23272f !important;
-            color: #ffffff !important;
-            border-radius: 8px !important;
+        
+        /* Expanders modernos */
+        .stExpander {
+            background: var(--bg-secondary) !important;
+            border-radius: 12px !important;
+            border: 1px solid var(--border-color) !important;
+            margin-bottom: 1rem !important;
         }
-        .stAlert {
-            border-radius: 8px !important;
-            color: #ffffff !important;
-        }
+        
         .stExpanderHeader {
-            color: #2196F3 !important;
+            color: var(--accent-primary) !important;
+            font-weight: 600 !important;
+            padding: 1rem !important;
         }
-        .stSelectbox>div>div>div {
-            background: #23272f !important;
-            color: #ffffff !important;
+        
+        /* Alertas y métricas */
+        .stAlert {
+            border-radius: 12px !important;
+            border: none !important;
+            box-shadow: var(--shadow-light) !important;
         }
+        
+        .stMetric {
+            background: var(--bg-secondary) !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        
+        /* Tipografía */
         p, h1, h2, h3, h4, h5, h6 {
-            color: #ffffff !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-secondary);
         }
         </style>
         """
     else:  # Tema Claro
         css_tema = """
         <style>
-        body, .stApp {
-            background: #f8f9fa !important;
-            color: #333333 !important;
+        /* Variables CSS para tema claro */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #60a5fa;
+            --border-color: #e2e8f0;
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
+        
+        /* Estilos base */
+        body, .stApp {
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+        
+        /* Header principal moderno */
         .main-header {
-            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
+            background: var(--gradient-primary);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            margin: 1rem 0 2rem 0;
             text-align: center;
             color: white;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
         }
-        .search-container {
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        
+        .main-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .main-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        /* Contenedores modernos */
+        .search-container, .results-container {
+            background: var(--bg-secondary);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
             margin-bottom: 2rem;
-            color: #333333;
-            border: 1px solid #e0e0e0;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
-        .results-container {
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            color: #333333;
-            border: 1px solid #e0e0e0;
+        
+        .search-container:hover, .results-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
         }
-        .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
+        
+        /* Botones modernos */
+        .stButton > button {
+            background: var(--gradient-secondary) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            padding: 0.75rem 1.5rem !important;
+            font-size: 1rem !important;
+            transition: all 0.3s ease !important;
+            box-shadow: var(--shadow-light) !important;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-medium) !important;
+        }
+        
+        /* Botón de tema */
+        .stButton > button[key="theme_toggle"] {
+            background: var(--bg-secondary) !important;
+            border: 2px solid var(--accent-primary) !important;
+            border-radius: 50px !important;
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 1.5rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 1rem 0 !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* Campos de entrada modernos */
+        .stTextInput > div > div > input {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border: 2px solid var(--border-color) !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+            font-size: 1rem !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            border-color: var(--accent-primary) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+        
+        /* Tablas y dataframes */
+        .stDataFrame, .stTable {
             background: transparent !important;
-            color: #333333 !important;
+            color: var(--text-primary) !important;
         }
-        .stButton>button {
-            background: #e53935 !important;
-            color: #fff !important;
-            border-radius: 8px !important;
-            font-weight: bold;
+        
+        .stDataFrame > div {
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            box-shadow: var(--shadow-light) !important;
         }
-        .stTextInput>div>input {
-            background: #ffffff !important;
-            color: #333333 !important;
-            border-radius: 8px !important;
-            border: 1px solid #e0e0e0 !important;
+        
+        /* Expanders modernos */
+        .stExpander {
+            background: var(--bg-secondary) !important;
+            border-radius: 12px !important;
+            border: 1px solid var(--border-color) !important;
+            margin-bottom: 1rem !important;
         }
-        .stAlert {
-            border-radius: 8px !important;
-            color: #333333 !important;
-        }
+        
         .stExpanderHeader {
-            color: #2196F3 !important;
+            color: var(--accent-primary) !important;
+            font-weight: 600 !important;
+            padding: 1rem !important;
         }
-        .stSelectbox>div>div>div {
-            background: #ffffff !important;
-            color: #333333 !important;
+        
+        /* Alertas y métricas */
+        .stAlert {
+            border-radius: 12px !important;
+            border: none !important;
+            box-shadow: var(--shadow-light) !important;
         }
+        
+        .stMetric {
+            background: var(--bg-secondary) !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        
+        /* Tipografía */
         p, h1, h2, h3, h4, h5, h6 {
-            color: #333333 !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-secondary);
         }
         </style>
         """
