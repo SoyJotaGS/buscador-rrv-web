@@ -514,21 +514,13 @@ def main():
     """
     st.markdown(css_tema, unsafe_allow_html=True)
 
-    # Header principal
+    # Header principal (único)
     st.markdown("""
     <div class="main-header">
         <h1>🔍 BUSCADOR RRV</h1>
         <p>Consultas de base de datos y plataforma</p>
     </div>
     """, unsafe_allow_html=True)
-
-    # Branding discreto debajo del header principal
-    st.markdown('''
-    <div style="text-align:center; margin-bottom: 1.2rem; margin-top: -0.5rem;">
-        <span style="font-size:1.05rem; font-weight:600; color:#b3b8c5; letter-spacing:1px;">Buscador RRV</span><br>
-        <span style="font-size:0.95rem; color:#8fa1b3;">Consultas de base de datos y plataforma</span>
-    </div>
-    ''', unsafe_allow_html=True)
 
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
@@ -538,8 +530,6 @@ def main():
         st.error("❌ No se encontraron credenciales. Contacta al administrador para configurar el acceso.")
         st.info("💡 Para desarrolladores: Configura las credenciales en Streamlit Cloud Secrets o agrega un archivo JSON local.")
         return
-
-    st.success("✅ Sistema conectado y listo para buscar.")
 
     # Buscar Placa
     st.markdown('<div class="search-container">', unsafe_allow_html=True)
@@ -551,7 +541,7 @@ def main():
     )
     buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
-    
+
     # Ejecutar búsquedas en paralelo
     if buscar_btn and placa_buscar.strip():
         with st.spinner('🔍 Buscando en Google Sheets y consultando API de RRVSAC en paralelo...'):
@@ -633,16 +623,6 @@ def main():
                         key=f"download_{i}"
                     )
         st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Footer
-    st.markdown("---")
-    st.markdown(
-        "<div style='text-align: center; color: #666; font-size: 0.9em;'>"
-        f"🕒 Última actualización: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | "
-        "🔗 Ejecutándose en GitHub Codespaces"
-        "</div>",
-        unsafe_allow_html=True
-    )
 
 if __name__ == "__main__":
     main()
