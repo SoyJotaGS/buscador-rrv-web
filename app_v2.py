@@ -350,6 +350,9 @@ def main():
     # CSS personalizado para mejorar el diseño
     st.markdown("""
     <style>
+    body, .stApp {
+        background: #181c23 !important;
+    }
     .main-header {
         background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
         padding: 2rem;
@@ -359,17 +362,39 @@ def main():
         color: white;
     }
     .search-container {
-        background: white;
+        background: #23272f;
         padding: 2rem;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         margin-bottom: 2rem;
+        color: #fff;
     }
     .results-container {
-        background: white;
+        background: #23272f;
         padding: 2rem;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        color: #fff;
+    }
+    .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
+        background: transparent !important;
+    }
+    .stButton>button {
+        background: #e53935 !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        font-weight: bold;
+    }
+    .stTextInput>div>input {
+        background: #23272f !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+    }
+    .stAlert {
+        border-radius: 8px !important;
+    }
+    .stExpanderHeader {
+        color: #2196F3 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -393,41 +418,33 @@ def main():
     
     st.success("✅ Sistema conectado y listo para buscar.")
     
-    # Container de búsqueda
-    with st.container():
-        st.markdown('<div class="search-container">', unsafe_allow_html=True)
-        
-        st.subheader("📋 Buscar Placa")
-        
-        col1, col2 = st.columns([3, 1])
-        
-        with col1:
-            placa_buscar = st.text_input(
-                "Ingresa la placa a buscar:",
-                placeholder="Ej: ABC-123",
-                key="placa_input"
-            )
-        
-        with col2:
-            st.write("")  # Espaciado
-            buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Buscar Placa
+    st.markdown('<div class="search-container">', unsafe_allow_html=True)
+    st.subheader("📋 Buscar Placa")
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        placa_buscar = st.text_input(
+            "Ingresa la placa a buscar:",
+            placeholder="Ej: ABC-123",
+            key="placa_input"
+        )
+    with col2:
+        st.write("")  # Espaciado
+        buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Ejecutar búsqueda
     if buscar_btn and placa_buscar.strip():
         resultados = app.buscar_placas_en_drive(placa_buscar.strip())
-        # Ordenar resultados cronológicamente (más reciente primero)
         resultados_ordenados = app.ordenar_resultados_cronologicamente(resultados)
         st.session_state.resultados_actuales = resultados_ordenados
-        
         if not resultados_ordenados:
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
     
     # Buscar en RRVSAC API
-    rrvsac_status = None
+    rrvsac_status = 'NO ACTIVO'
     if placa_buscar and buscar_btn:
         try:
             url = f'https://plataforma.rrvsac.com/api/vehicles?search.info.license_plate={placa_buscar.strip()}'
@@ -442,27 +459,26 @@ def main():
                 data = response.json()
                 if data and 'info' in data and data['info']:
                     rrvsac_status = 'ACTIVO'
-                else:
-                    rrvsac_status = 'NO ACTIVO'
-            else:
-                rrvsac_status = 'NO ACTIVO'
         except Exception:
             rrvsac_status = 'NO ACTIVO'
     
+    def etiqueta_rrvsac(valor):
+        if valor == 'ACTIVO':
+            return '<span style="background:#43a047;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
+        else:
+            return '<span style="background:#e53935;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
+
+    if rrvsac_status:
+        st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
+
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales:
         st.markdown('<div class="results-container">', unsafe_allow_html=True)
-        
-        # Header de resultados
         col1, col2 = st.columns([2, 1])
-        
         with col1:
             st.subheader("📊 Resultados Encontrados")
-        
         with col2:
             st.metric("Total Registros", len(st.session_state.resultados_actuales))
-        
-        # Crear DataFrame para mostrar los resultados
         df_resultados = pd.DataFrame([
             {
                 'FECHA': resultado['fecha'],
@@ -470,62 +486,37 @@ def main():
                 'EMPRESA': resultado['empresa'],
                 'ÚLTIMO ESTADO': resultado['trabajo'],
                 'SISTEMA': resultado['sistema'],
-                'HOJA': resultado['hoja'],
-                'PLATAFORMA': rrvsac_status
+                'HOJA': resultado['hoja']
             }
             for resultado in st.session_state.resultados_actuales
         ])
-        
-        # Mostrar etiqueta visual
-        def etiqueta_rrvsac(valor):
-            if valor == 'ACTIVO':
-                return '<span style="background:#43a047;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
-            else:
-                return '<span style="background:#e53935;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
-
-        if rrvsac_status:
-            st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
-
-        # Mostrar tabla
-        st.write(df_resultados.to_html(escape=False, index=False), unsafe_allow_html=True)
-        
-        # Mostrar detalles expandibles
+        st.dataframe(
+            df_resultados,
+            use_container_width=True,
+            hide_index=True
+        )
         st.subheader("🔍 Detalles Completos")
-        
         for i, resultado in enumerate(st.session_state.resultados_actuales):
-            # Determinar el orden cronológico
             orden_cronologico = "🕒 Más Reciente" if i == 0 else f"📅 Registro #{i+1}"
-            
             with st.expander(f"{orden_cronologico} - Placa: {resultado['placa']} ({resultado['fecha']})"):
-                
-                # Información básica
                 col1, col2 = st.columns(2)
-                
                 with col1:
                     st.markdown("**📍 Ubicación del Registro**")
                     st.write(f"**Hoja:** {resultado['hoja']}")
                     st.write(f"**Sistema:** {resultado['sistema']}")
                     st.write(f"**Fila:** {resultado['fila']}")
-                
                 with col2:
                     st.markdown("**📊 Información Principal**")
                     st.write(f"**Placa:** {resultado['placa']}")
                     st.write(f"**Fecha:** {resultado['fecha']}")
                     st.write(f"**Empresa:** {resultado['empresa']}")
                     st.write(f"**Estado:** {resultado['trabajo']}")
-                
-                # Todos los datos de la fila
                 st.markdown("**📄 Datos Completos de la Fila**")
-                
-                # Crear DataFrame con todos los datos
                 df_detalle = pd.DataFrame({
                     'Campo': resultado['encabezados'],
                     'Valor': resultado['datos_completos']
                 })
-                
                 st.dataframe(df_detalle, use_container_width=True, hide_index=True)
-                
-                # Botón de descarga individual
                 excel_bytes = app.crear_excel_bytes(resultado)
                 if excel_bytes:
                     st.download_button(
@@ -535,7 +526,6 @@ def main():
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         key=f"download_{i}"
                     )
-        
         st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer
