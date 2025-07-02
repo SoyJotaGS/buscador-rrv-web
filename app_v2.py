@@ -397,11 +397,15 @@ def main():
         color: var(--text-primary) !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
+    .main-header, .search-container, .results-container {
+        width: 90vw;
+        max-width: 1200px;
+        margin: 0.5rem auto 0.5rem auto;
+    }
     .main-header {
         background: var(--gradient-primary);
         padding: 1.2rem 1rem;
         border-radius: 12px;
-        margin: 0.5rem 0 0.5rem 0;
         text-align: center;
         color: white;
         box-shadow: none;
@@ -425,7 +429,6 @@ def main():
         padding: 2.2rem 1.5rem;
         border-radius: 14px;
         box-shadow: var(--shadow-light);
-        margin-bottom: 2rem;
         color: var(--text-primary);
         border: 1px solid var(--border-color);
         backdrop-filter: blur(6px);
