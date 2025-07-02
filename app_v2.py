@@ -431,15 +431,17 @@ def main():
     if placa_buscar and buscar_btn:
         try:
             url = f'https://plataforma.rrvsac.com/api/vehicles?search.info.license_plate={placa_buscar.strip()}'
-            headers = {'authenticate': 'e843453d60c9b826ed4704f77a88ab6fb4bcb9cd88b2ce25e600cd5b'}
+            headers = {
+                'authenticate': 'e843453d60c9b826ed4704f77a88ab6fb4bcb9cd88b2ce25e600cd5b',
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive'
+            }
             response = requests.get(url, headers=headers, timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                # Suponiendo que la API devuelve una lista de vehículos y tienen un campo 'active' o similar
-                if data and isinstance(data, list) and len(data) > 0:
-                    # Puedes ajustar el campo según la estructura real
-                    activo = any(v.get('active', False) for v in data)
-                    rrvsac_status = 'ACTIVO' if activo else 'NO ACTIVO'
+                if data and 'info' in data and data['info']:
+                    rrvsac_status = 'ACTIVO'
                 else:
                     rrvsac_status = 'NO ACTIVO'
             else:
@@ -469,20 +471,22 @@ def main():
                 'ÚLTIMO ESTADO': resultado['trabajo'],
                 'SISTEMA': resultado['sistema'],
                 'HOJA': resultado['hoja'],
-                'RRVSAC': rrvsac_status
+                'PLATAFORMA': rrvsac_status
             }
             for resultado in st.session_state.resultados_actuales
         ])
         
-        # Mostrar tabla
+        # Mostrar etiqueta visual
         def etiqueta_rrvsac(valor):
             if valor == 'ACTIVO':
-                return '<span style="background:#43a047;color:white;padding:4px 10px;border-radius:8px;font-weight:bold;">ACTIVO</span>'
+                return '<span style="background:#43a047;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
             else:
-                return '<span style="background:#e53935;color:white;padding:4px 10px;border-radius:8px;font-weight:bold;">NO ACTIVO</span>'
+                return '<span style="background:#e53935;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
 
-        df_resultados['RRVSAC'] = df_resultados['RRVSAC'].apply(etiqueta_rrvsac)
+        if rrvsac_status:
+            st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
 
+        # Mostrar tabla
         st.write(df_resultados.to_html(escape=False, index=False), unsafe_allow_html=True)
         
         # Mostrar detalles expandibles
@@ -509,7 +513,6 @@ def main():
                     st.write(f"**Fecha:** {resultado['fecha']}")
                     st.write(f"**Empresa:** {resultado['empresa']}")
                     st.write(f"**Estado:** {resultado['trabajo']}")
-                    st.write(f"**RRVSAC:** " + etiqueta_rrvsac(rrvsac_status), unsafe_allow_html=True)
                 
                 # Todos los datos de la fila
                 st.markdown("**📄 Datos Completos de la Fila**")
