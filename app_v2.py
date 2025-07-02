@@ -399,16 +399,15 @@ def main():
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 1100vw !important;
-        max-width: 1100vw !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
         overflow-x: hidden !important;
     }
     
     .main-container {
-        max-width: 1100px;
-        width: 900vw;
-        margin: 0 auto;
-        padding: 1rem 0;
+        width: 100vw;
+        margin: 0;
+        padding: 1.5rem 3vw;
         box-sizing: border-box;
     }
     
@@ -416,10 +415,8 @@ def main():
         text-align: center;
         margin-bottom: 2rem;
         padding: 0;
-        max-width: 1100px;
-        width: 90vw;
-        margin-left: auto;
-        margin-right: auto;
+        width: 100vw;
+        margin: 0;
     }
     
     .rrv-title {
@@ -442,16 +439,14 @@ def main():
     
     .search-section {
         background: var(--bg-secondary);
-        padding: 2rem 2rem;
+        padding: 2rem 3vw;
         border-radius: 16px;
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         margin-bottom: 1.5rem;
         backdrop-filter: blur(10px);
-        max-width: 1100px;
-        width: 90vw;
-        margin-left: auto;
-        margin-right: auto;
+        width: 100vw;
+        margin: 0;
         box-sizing: border-box;
     }
     
@@ -459,10 +454,8 @@ def main():
         display: flex;
         justify-content: center;
         margin: 1rem 0;
-        max-width: 1100px;
-        width: 90vw;
-        margin-left: auto;
-        margin-right: auto;
+        width: 100vw;
+        margin: 0;
     }
     
     .status-badge {
@@ -487,15 +480,13 @@ def main():
     
     .results-section {
         background: var(--bg-secondary);
-        padding: 2rem 2rem;
+        padding: 2rem 3vw;
         border-radius: 16px;
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         backdrop-filter: blur(10px);
-        max-width: 1100px;
-        width: 90vw;
-        margin-left: auto;
-        margin-right: auto;
+        width: 100vw;
+        margin: 0;
         box-sizing: border-box;
     }
     
