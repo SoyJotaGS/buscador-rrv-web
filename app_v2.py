@@ -380,9 +380,7 @@ def main():
     .rrv-wrapper {
         display: flex;
         flex-direction: column;
-        align-items: center;
         width: 100%;
-        min-height: 0vh;
         margin-top: 0 !important;
         padding-top: 0 !important;
     }
@@ -579,7 +577,7 @@ def main():
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
 
-    # Mostrar la etiqueta de estado solo si hay búsqueda y estado
+    # Mostrar la etiqueta de estado solo si hay búsqueda y estado, centrada y sin contenedor
     def etiqueta_rrvsac(valor):
         if valor == 'ACTIVO':
             return '<span style="background:#43a047;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
@@ -587,16 +585,12 @@ def main():
             return '<span style="background:#e53935;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
 
     if (('buscar_btn' in locals() and buscar_btn) or ('buscar_btn' in globals() and buscar_btn)) and placa_buscar.strip() and 'rrvsac_status' in locals():
-        st.markdown(f'<div class="status-container">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="text-align:center; margin-bottom: 0.8rem;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
 
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales and len(st.session_state.resultados_actuales) > 0:
         st.markdown('<div class="results-container">', unsafe_allow_html=True)
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            st.subheader("📊 Resultados Encontrados")
-        with col2:
-            st.metric("Total Registros", len(st.session_state.resultados_actuales))
+        st.subheader("📊 Resultados Encontrados")
         df_resultados = pd.DataFrame([
             {
                 'FECHA': resultado['fecha'],
