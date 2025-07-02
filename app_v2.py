@@ -374,13 +374,21 @@ class BuscadorPlacasWeb:
             return None
 
 def main():
-    # Configuración de la página
+    # Configuración de la página con tema oscuro forzado
     st.set_page_config(
-        page_title="BUSCADOR RRV",
+        page_title="🔍 Buscador RRV",
         page_icon="🔍",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
+    
+    # Forzar tema oscuro desde el inicio
+    st.markdown("""
+    <script>
+    const doc = window.parent.document;
+    doc.body.classList.add('dark-theme');
+    </script>
+    """, unsafe_allow_html=True)
     
     # CSS tema oscuro moderno y elegante
     st.markdown("""
@@ -403,10 +411,21 @@ def main():
         --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
     }
     
-    body, .stApp {
+    /* Forzar tema oscuro en toda la aplicación */
+    html, body, .stApp, .main, .block-container {
         background: var(--bg-primary) !important;
         color: var(--text-primary) !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+    
+    /* Sobrescribir todos los elementos de Streamlit */
+    .stApp * {
+        color: var(--text-primary) !important;
+    }
+    
+    /* Forzar fondo oscuro en todos los contenedores */
+    .stApp > div, .stApp > div > div, .main > div, .block-container > div {
+        background: var(--bg-primary) !important;
     }
     
     .main-header {
@@ -527,12 +546,31 @@ def main():
         border: 1px solid var(--border-color) !important;
     }
     
+    /* Forzar tema oscuro en tablas */
+    .stDataFrame table, .stDataFrame thead, .stDataFrame tbody, .stDataFrame tr, .stDataFrame td, .stDataFrame th {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+    }
+    
+    .stDataFrame th {
+        background: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+    }
+    
     .stExpander {
         background: var(--bg-tertiary) !important;
         border-radius: 12px !important;
         border: 1px solid var(--border-color) !important;
         margin-bottom: 1rem !important;
         box-shadow: var(--shadow-light) !important;
+    }
+    
+    /* Contenido del expander */
+    .stExpander > div > div {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
     }
     
     .stExpanderHeader {
@@ -566,8 +604,22 @@ def main():
         margin-bottom: 1rem !important;
     }
     
-    p, h1, h2, h3, h4, h5, h6, .stMarkdown {
+    /* Forzar colores de texto en todos los elementos */
+    p, h1, h2, h3, h4, h5, h6, .stMarkdown, .stText, .stCaption, label, span, div {
         color: var(--text-primary) !important;
+    }
+    
+    /* Elementos específicos de Streamlit */
+    .stSelectbox label, .stTextInput label, .stTextArea label, .stNumberInput label {
+        color: var(--text-primary) !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Forzar fondo en elementos de formulario */
+    .stSelectbox > div > div, .stTextArea > div > div > textarea {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+        border: 2px solid var(--border-color) !important;
     }
     
     .stColumns > div {
@@ -635,6 +687,46 @@ def main():
     .search-container:hover, .results-container:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    }
+    
+    /* Eliminar completamente el tema claro de Streamlit */
+    .stApp [data-testid="stSidebar"] {
+        background: var(--bg-secondary) !important;
+    }
+    
+    /* Forzar tema oscuro en elementos específicos */
+    .stSpinner, .stProgress, .stSlider {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Eliminar fondos blancos residuales */
+    .element-container, .stBlock, .stColumn {
+        background: transparent !important;
+    }
+    
+    /* Forzar tema oscuro en markdown y código */
+    .stMarkdown pre, .stMarkdown code {
+        background: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+    
+    /* Elementos de navegación y menú */
+    .stTabs, .stTab {
+        background: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Spinner y elementos de carga */
+    .stSpinner > div {
+        border-color: var(--accent-primary) !important;
+    }
+    
+    /* Elementos de fecha y hora */
+    .stDateInput, .stTimeInput {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
     }
     </style>
     """, unsafe_allow_html=True)
