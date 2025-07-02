@@ -457,8 +457,8 @@ def main():
         }
         
         .main-header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
+            font-size: 1.8rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
@@ -651,8 +651,8 @@ def main():
         }
         
         .main-header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
+            font-size: 1.8rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -801,7 +801,7 @@ def main():
     st.markdown("""
     <div class="main-header">
         <h1>🔍 BUSCADOR RRV</h1>
-        <p>Sistema de búsqueda de placas en Google Sheets</p>
+        <p>Consultas de base de datos y plataforma</p>
     </div>
     """, unsafe_allow_html=True)
     
