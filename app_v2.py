@@ -435,31 +435,32 @@ def main():
     
     /* Contenedor principal eliminado - no es necesario */
     
-    .title-section {
-        text-align: center;
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
-        margin-bottom: 1rem !important;
-    }
+    /* Título sin contenedor - aplicar estilos directamente */
     
     .rrv-title {
         font-size: 1.8rem;
         font-weight: 700;
         color: var(--text-primary);
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.5rem 0 !important;
         background: var(--gradient-primary);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        text-align: center !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
     }
     
     .rrv-subtitle {
         font-size: 1.1rem;
         color: var(--text-secondary);
-        margin: 0;
+        margin: 0 0 1rem 0 !important;
         font-weight: 400;
+        text-align: center !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
     }
     
     .search-section {
@@ -641,17 +642,35 @@ def main():
         width: 100% !important;
         max-width: 100% !important;
     }
+    
+    /* Ocultar contenedores vacíos generados automáticamente */
+    .stApp > div:empty {
+        display: none !important;
+    }
+    
+    .stApp > div > div:empty {
+        display: none !important;
+    }
+    
+    /* Eliminar espaciado innecesario entre elementos */
+    .element-container {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .stMarkdown {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
     </style>
     """
     st.markdown(css_tema, unsafe_allow_html=True)
 
     # Sin contenedor principal innecesario
 
-    # Título y subtítulo optimizados
-    st.markdown('<div class="title-section">', unsafe_allow_html=True)
+    # Título y subtítulo sin contenedor
     st.markdown('<h1 class="rrv-title">🔍 BUSCADOR RRV</h1>', unsafe_allow_html=True)
     st.markdown('<p class="rrv-subtitle">Consultas de base de datos y plataforma</p>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
