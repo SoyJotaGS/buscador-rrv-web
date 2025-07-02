@@ -374,7 +374,7 @@ class BuscadorPlacasWeb:
             return None
 
 def main():
-    # Configuración de la página con tema oscuro forzado
+    # Configuración de la página
     st.set_page_config(
         page_title="🔍 Buscador RRV",
         page_icon="🔍",
@@ -382,362 +382,9 @@ def main():
         initial_sidebar_state="collapsed"
     )
     
-    # Forzar tema oscuro desde el inicio
-    st.markdown("""
-    <script>
-    const doc = window.parent.document;
-    doc.body.classList.add('dark-theme');
-    </script>
-    """, unsafe_allow_html=True)
-    
-    # CSS tema oscuro moderno y elegante
-    st.markdown("""
-    <style>
-    :root {
-        --bg-primary: #0f1419;
-        --bg-secondary: #1a1f26;
-        --bg-tertiary: #252a32;
-        --text-primary: #f8fafc;
-        --text-secondary: #cbd5e1;
-        --text-muted: #64748b;
-        --accent-primary: #3b82f6;
-        --accent-secondary: #ef4444;
-        --accent-success: #10b981;
-        --border-color: #374151;
-        --shadow-dark: 0 4px 12px rgba(0,0,0,0.4);
-        --shadow-light: 0 2px 8px rgba(0,0,0,0.2);
-        --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        --gradient-secondary: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    }
-    
-    /* Forzar tema oscuro en toda la aplicación */
-    html, body, .stApp, .main, .block-container {
-        background: var(--bg-primary) !important;
-        color: var(--text-primary) !important;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }
-    
-    /* Sobrescribir todos los elementos de Streamlit */
-    .stApp * {
-        color: var(--text-primary) !important;
-    }
-    
-    /* Forzar fondo oscuro en todos los contenedores */
-    .stApp > div, .stApp > div > div, .main > div, .block-container > div {
-        background: var(--bg-primary) !important;
-    }
-    
-    .main-header {
-        background: var(--gradient-primary);
-        padding: 2.5rem 2rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
-        text-align: center;
-        color: white;
-        box-shadow: var(--shadow-dark);
-        border: 1px solid var(--border-color);
-    }
-    
-    .main-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0 0 0.5rem 0;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .main-header p {
-        font-size: 1.2rem;
-        margin: 0;
-        opacity: 0.9;
-    }
-    
-    .search-container {
-        background: var(--bg-secondary);
-        padding: 2.5rem;
-        border-radius: 16px;
-        box-shadow: var(--shadow-dark);
-        margin-bottom: 2rem;
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        backdrop-filter: blur(10px);
-    }
-    
-    .results-container {
-        background: var(--bg-secondary);
-        padding: 2.5rem;
-        border-radius: 16px;
-        box-shadow: var(--shadow-dark);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        backdrop-filter: blur(10px);
-    }
-    
-    .stButton > button {
-        background: var(--gradient-secondary) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 12px !important;
-        font-weight: 600 !important;
-        padding: 0.875rem 2rem !important;
-        font-size: 1rem !important;
-        transition: all 0.3s ease !important;
-        box-shadow: var(--shadow-light) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: var(--shadow-dark) !important;
-    }
-    
-    .stTextInput > div > div > input {
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-        border: 2px solid var(--border-color) !important;
-        border-radius: 12px !important;
-        padding: 1rem 1.25rem !important;
-        font-size: 1rem !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stTextInput > div > div > input:focus {
-        border-color: var(--accent-primary) !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
-    }
-    
-    .stAlert {
-        border-radius: 12px !important;
-        border: none !important;
-        box-shadow: var(--shadow-light) !important;
-        backdrop-filter: blur(10px) !important;
-    }
-    
-    .stSuccess {
-        background: rgba(16, 185, 129, 0.1) !important;
-        color: var(--accent-success) !important;
-        border-left: 4px solid var(--accent-success) !important;
-    }
-    
-    .stWarning {
-        background: rgba(245, 158, 11, 0.1) !important;
-        color: #f59e0b !important;
-        border-left: 4px solid #f59e0b !important;
-    }
-    
-    .stError {
-        background: rgba(239, 68, 68, 0.1) !important;
-        color: var(--accent-secondary) !important;
-        border-left: 4px solid var(--accent-secondary) !important;
-    }
-    
-    .stInfo {
-        background: rgba(59, 130, 246, 0.1) !important;
-        color: var(--accent-primary) !important;
-        border-left: 4px solid var(--accent-primary) !important;
-    }
-    
-    .stDataFrame {
-        background: var(--bg-tertiary) !important;
-        border-radius: 12px !important;
-        overflow: hidden !important;
-        box-shadow: var(--shadow-light) !important;
-        border: 1px solid var(--border-color) !important;
-    }
-    
-    /* Forzar tema oscuro en tablas */
-    .stDataFrame table, .stDataFrame thead, .stDataFrame tbody, .stDataFrame tr, .stDataFrame td, .stDataFrame th {
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-        border-color: var(--border-color) !important;
-    }
-    
-    .stDataFrame th {
-        background: var(--bg-secondary) !important;
-        color: var(--text-primary) !important;
-        font-weight: 600 !important;
-    }
-    
-    .stExpander {
-        background: var(--bg-tertiary) !important;
-        border-radius: 12px !important;
-        border: 1px solid var(--border-color) !important;
-        margin-bottom: 1rem !important;
-        box-shadow: var(--shadow-light) !important;
-    }
-    
-    /* Contenido del expander */
-    .stExpander > div > div {
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-    }
-    
-    .stExpanderHeader {
-        color: var(--accent-primary) !important;
-        font-weight: 600 !important;
-        padding: 1rem !important;
-        border-radius: 12px !important;
-    }
-    
-    .stMetric {
-        background: var(--bg-tertiary) !important;
-        border-radius: 12px !important;
-        padding: 1.5rem !important;
-        border: 1px solid var(--border-color) !important;
-        box-shadow: var(--shadow-light) !important;
-    }
-    
-    .stMetric > div {
-        color: var(--text-primary) !important;
-    }
-    
-    .stMetric [data-testid="metric-value"] {
-        color: var(--accent-primary) !important;
-        font-size: 2rem !important;
-        font-weight: 700 !important;
-    }
-    
-    .stSubheader {
-        color: var(--text-primary) !important;
-        font-weight: 600 !important;
-        margin-bottom: 1rem !important;
-    }
-    
-    /* Forzar colores de texto en todos los elementos */
-    p, h1, h2, h3, h4, h5, h6, .stMarkdown, .stText, .stCaption, label, span, div {
-        color: var(--text-primary) !important;
-    }
-    
-    /* Elementos específicos de Streamlit */
-    .stSelectbox label, .stTextInput label, .stTextArea label, .stNumberInput label {
-        color: var(--text-primary) !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Forzar fondo en elementos de formulario */
-    .stSelectbox > div > div, .stTextArea > div > div > textarea {
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-        border: 2px solid var(--border-color) !important;
-    }
-    
-    .stColumns > div {
-        padding: 0 0.5rem !important;
-    }
-    
-    /* Scrollbar personalizada */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: var(--bg-secondary);
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: var(--accent-primary);
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--accent-secondary);
-    }
-    
-    /* Status badges */
-    .status-active {
-        background: var(--gradient-success) !important;
-        color: white !important;
-        padding: 8px 24px !important;
-        border-radius: 50px !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        box-shadow: var(--shadow-light) !important;
-        display: inline-block !important;
-    }
-    
-    .status-inactive {
-        background: var(--gradient-secondary) !important;
-        color: white !important;
-        padding: 8px 24px !important;
-        border-radius: 50px !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        box-shadow: var(--shadow-light) !important;
-        display: inline-block !important;
-    }
-    
-    /* Footer styling */
-    .footer {
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        padding: 2rem 0;
-        border-top: 1px solid var(--border-color);
-        margin-top: 3rem;
-    }
-    
-    /* Animaciones suaves */
-    .search-container, .results-container, .main-header {
-        transition: all 0.3s ease;
-    }
-    
-    .search-container:hover, .results-container:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    }
-    
-    /* Eliminar completamente el tema claro de Streamlit */
-    .stApp [data-testid="stSidebar"] {
-        background: var(--bg-secondary) !important;
-    }
-    
-    /* Forzar tema oscuro en elementos específicos */
-    .stSpinner, .stProgress, .stSlider {
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-    }
-    
-    /* Eliminar fondos blancos residuales */
-    .element-container, .stBlock, .stColumn {
-        background: transparent !important;
-    }
-    
-    /* Forzar tema oscuro en markdown y código */
-    .stMarkdown pre, .stMarkdown code {
-        background: var(--bg-secondary) !important;
-        color: var(--text-primary) !important;
-        border: 1px solid var(--border-color) !important;
-    }
-    
-    /* Elementos de navegación y menú */
-    .stTabs, .stTab {
-        background: var(--bg-secondary) !important;
-        color: var(--text-primary) !important;
-    }
-    
-    /* Spinner y elementos de carga */
-    .stSpinner > div {
-        border-color: var(--accent-primary) !important;
-    }
-    
-    /* Elementos de fecha y hora */
-    .stDateInput, .stTimeInput {
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
     # Header principal
-    st.markdown("""
-    <div class="main-header">
-        <h1>🔍 BUSCADOR RRV</h1>
-        <p>Sistema de búsqueda de placas en Google Sheets</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.title("🔍 BUSCADOR RRV")
+    st.markdown("Sistema de búsqueda de placas en Google Sheets")
     
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
@@ -751,7 +398,6 @@ def main():
     st.success("✅ Sistema conectado y listo para buscar.")
     
     # Buscar Placa
-    st.markdown('<div class="search-container">', unsafe_allow_html=True)
     st.subheader("📋 Buscar Placa")
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -763,7 +409,6 @@ def main():
     with col2:
         st.write("")  # Espaciado
         buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
     
     # Ejecutar búsquedas en paralelo
     if buscar_btn and placa_buscar.strip():
@@ -787,25 +432,21 @@ def main():
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
-    
-    def etiqueta_rrvsac(valor):
-        if valor == 'ACTIVO':
-            return '<span class="status-active">✅ ACTIVO EN PLATAFORMA</span>'
+        
+        # Mostrar estado de RRVSAC
+        if rrvsac_status == 'ACTIVO':
+            st.success("✅ ACTIVO EN PLATAFORMA")
         else:
-            return '<span class="status-inactive">❌ NO ACTIVO EN PLATAFORMA</span>'
-
-    # Mostrar etiqueta de estado solo después de la búsqueda
-    if buscar_btn and placa_buscar.strip() and 'rrvsac_status' in locals():
-        st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
+            st.error("❌ NO ACTIVO EN PLATAFORMA")
 
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales:
-        st.markdown('<div class="results-container">', unsafe_allow_html=True)
         col1, col2 = st.columns([2, 1])
         with col1:
             st.subheader("📊 Resultados Encontrados")
         with col2:
             st.metric("Total Registros", len(st.session_state.resultados_actuales))
+        
         df_resultados = pd.DataFrame([
             {
                 'FECHA': resultado['fecha'],
@@ -817,11 +458,13 @@ def main():
             }
             for resultado in st.session_state.resultados_actuales
         ])
+        
         st.dataframe(
             df_resultados,
             use_container_width=True,
             hide_index=True
         )
+        
         st.subheader("🔍 Detalles Completos")
         for i, resultado in enumerate(st.session_state.resultados_actuales):
             orden_cronologico = "🕒 Más Reciente" if i == 0 else f"📅 Registro #{i+1}"
@@ -838,12 +481,14 @@ def main():
                     st.write(f"**Fecha:** {resultado['fecha']}")
                     st.write(f"**Empresa:** {resultado['empresa']}")
                     st.write(f"**Estado:** {resultado['trabajo']}")
+                
                 st.markdown("**📄 Datos Completos de la Fila**")
                 df_detalle = pd.DataFrame({
                     'Campo': resultado['encabezados'],
                     'Valor': resultado['datos_completos']
                 })
                 st.dataframe(df_detalle, use_container_width=True, hide_index=True)
+                
                 excel_bytes = app.crear_excel_bytes(resultado)
                 if excel_bytes:
                     st.download_button(
@@ -853,16 +498,10 @@ def main():
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         key=f"download_{i}"
                     )
-        st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer
-    st.markdown(
-        f"<div class='footer'>"
-        f"🕒 Última actualización: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | "
-        "🔗 Sistema RRV - Búsqueda de Placas"
-        "</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("---")
+    st.caption(f"🕒 Última actualización: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | 🔗 Sistema RRV - Búsqueda de Placas")
 
 if __name__ == "__main__":
     main()
