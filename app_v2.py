@@ -405,10 +405,10 @@ def main():
     }
     
     .main-container {
-        width: 100vw;
-        max-width: 100vw;
-        margin: 0;
-        padding: 1rem 3rem;
+        max-width: 1100px;
+        width: 90vw;
+        margin: 0 auto;
+        padding: 1rem 0;
         box-sizing: border-box;
     }
     
@@ -416,8 +416,10 @@ def main():
         text-align: center;
         margin-bottom: 2rem;
         padding: 0;
-        width: 100vw;
-        max-width: 100vw;
+        max-width: 1100px;
+        width: 90vw;
+        margin-left: auto;
+        margin-right: auto;
     }
     
     .rrv-title {
@@ -440,14 +442,16 @@ def main():
     
     .search-section {
         background: var(--bg-secondary);
-        padding: 2rem 3rem;
+        padding: 2rem 2rem;
         border-radius: 16px;
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         margin-bottom: 1.5rem;
         backdrop-filter: blur(10px);
-        width: 100vw;
-        max-width: 100vw;
+        max-width: 1100px;
+        width: 90vw;
+        margin-left: auto;
+        margin-right: auto;
         box-sizing: border-box;
     }
     
@@ -455,8 +459,10 @@ def main():
         display: flex;
         justify-content: center;
         margin: 1rem 0;
-        width: 100vw;
-        max-width: 100vw;
+        max-width: 1100px;
+        width: 90vw;
+        margin-left: auto;
+        margin-right: auto;
     }
     
     .status-badge {
@@ -481,13 +487,15 @@ def main():
     
     .results-section {
         background: var(--bg-secondary);
-        padding: 2rem 3rem;
+        padding: 2rem 2rem;
         border-radius: 16px;
         box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
         backdrop-filter: blur(10px);
-        width: 100vw;
-        max-width: 100vw;
+        max-width: 1100px;
+        width: 90vw;
+        margin-left: auto;
+        margin-right: auto;
         box-sizing: border-box;
     }
     
@@ -497,12 +505,12 @@ def main():
         border: none !important;
         border-radius: 12px !important;
         font-weight: 600 !important;
-        padding: 0.875rem 3rem !important;
+        padding: 0.875rem 2rem !important;
         font-size: 1rem !important;
         transition: all 0.3s ease !important;
         box-shadow: var(--shadow-light) !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100%;
     }
     
     .stButton > button:hover {
@@ -515,11 +523,11 @@ def main():
         color: var(--text-primary) !important;
         border: 2px solid var(--border-color) !important;
         border-radius: 12px !important;
-        padding: 1rem 2rem !important;
+        padding: 1rem 1.25rem !important;
         font-size: 1rem !important;
         transition: all 0.3s ease !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100%;
     }
     
     .stTextInput > div > div > input:focus {
@@ -536,8 +544,8 @@ def main():
         border-radius: 12px !important;
         overflow: hidden !important;
         box-shadow: var(--shadow-light) !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100%;
     }
     
     .stExpander {
@@ -546,8 +554,8 @@ def main():
         border: 1px solid var(--border-color) !important;
         margin-bottom: 1rem !important;
         box-shadow: var(--shadow-light) !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100%;
     }
     
     .stExpanderHeader {
@@ -561,8 +569,8 @@ def main():
         border-radius: 12px !important;
         border: none !important;
         box-shadow: var(--shadow-light) !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100%;
     }
     
     .stMetric {
@@ -570,8 +578,8 @@ def main():
         border-radius: 12px !important;
         padding: 1rem !important;
         border: 1px solid var(--border-color) !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100%;
     }
     
     p, h1, h2, h3, h4, h5, h6 {
@@ -595,21 +603,12 @@ def main():
         background: var(--accent-secondary);
     }
     
-    /* Forzar ancho completo en todos los elementos de Streamlit */
-    .stApp > div {
-        width: 100vw !important;
-        max-width: 100vw !important;
-    }
-    
-    .stApp > div > div {
-        width: 100vw !important;
-        max-width: 100vw !important;
-    }
-    
-    /* Asegurar que las columnas se estiren */
+    /* Eliminar reglas forzadas de 100vw */
+    .stApp > div,
+    .stApp > div > div,
     .stColumns > div {
-        width: 100vw !important;
-        max-width: 100vw !important;
+        width: auto !important;
+        max-width: 100% !important;
     }
     </style>
     """
