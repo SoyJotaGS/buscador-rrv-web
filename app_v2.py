@@ -10,6 +10,8 @@ import io
 import json
 import tempfile
 import requests
+import concurrent.futures
+import threading
 
 class BuscadorPlacasWeb:
     def __init__(self):
@@ -242,6 +244,32 @@ class BuscadorPlacasWeb:
         
         return resultados_ordenados
     
+    def consultar_api_rrvsac(self, placa):
+        """Consulta la API de RRVSAC para verificar el estado de una placa"""
+        try:
+            url = 'https://plataforma.rrvsac.com/api/vehicles'
+            params = {'search.info.license_plate': placa.strip()}
+            headers = {
+                'authenticate': 'e843453d60c9b826ed4704f77a88ab6fb4bcb9cd88b2ce25e600cd5b',
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive'
+            }
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                # Si la respuesta contiene un campo "id", se considera activo
+                if data and isinstance(data, dict) and 'id' in data:
+                    return 'ACTIVO'
+                else:
+                    return 'NO ACTIVO'
+            else:
+                return 'NO ACTIVO'
+        except Exception as e:
+            st.error(f"Error al consultar la API de RRVSAC: {str(e)}")
+            return 'NO ACTIVO'
+    
     def crear_excel_bytes(self, resultado):
         """Crea un archivo Excel en memoria y devuelve los bytes"""
         try:
@@ -433,42 +461,32 @@ def main():
         buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Ejecutar búsqueda
+    # Ejecutar búsquedas en paralelo
     if buscar_btn and placa_buscar.strip():
-        resultados = app.buscar_placas_en_drive(placa_buscar.strip())
+        with st.spinner('🔍 Buscando en Google Sheets y consultando API de RRVSAC en paralelo...'):
+            # Ejecutar ambas búsquedas en paralelo
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                # Búsqueda en Google Sheets
+                future_sheets = executor.submit(app.buscar_placas_en_drive, placa_buscar.strip())
+                # Consulta a la API de RRVSAC
+                future_api = executor.submit(app.consultar_api_rrvsac, placa_buscar.strip())
+                
+                # Obtener resultados
+                resultados = future_sheets.result()
+                rrvsac_status = future_api.result()
+        
+        # Procesar resultados de Google Sheets
         resultados_ordenados = app.ordenar_resultados_cronologicamente(resultados)
         st.session_state.resultados_actuales = resultados_ordenados
+        
         if not resultados_ordenados:
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
     
-    # Buscar en RRVSAC API
-    rrvsac_status = 'NO ACTIVO'
-    if placa_buscar and buscar_btn:
-        try:
-            url = 'https://plataforma.rrvsac.com/api/vehicles'
-            params = {'search.info.license_plate': placa_buscar.strip()}
-            headers = {
-                'authenticate': 'e843453d60c9b826ed4704f77a88ab6fb4bcb9cd88b2ce25e600cd5b',
-                'Accept': '*/*',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Connection': 'keep-alive'
-            }
-            response = requests.get(url, params=params, headers=headers, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                # Nueva lógica: si la respuesta contiene un campo "id", se considera activo
-                if data and isinstance(data, dict) and 'id' in data:
-                    rrvsac_status = 'ACTIVO'
-                else:
-                    rrvsac_status = 'NO ACTIVO'
-            else:
-                rrvsac_status = 'NO ACTIVO'
-        except Exception as e:
-            st.error(f"Error al consultar la API de RRVSAC: {str(e)}")
-            rrvsac_status = 'NO ACTIVO'
+    # Inicializar rrvsac_status si no se ha ejecutado la búsqueda
+    if 'rrvsac_status' not in locals():
+        rrvsac_status = 'NO ACTIVO'
     
     def etiqueta_rrvsac(valor):
         if valor == 'ACTIVO':
