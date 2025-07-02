@@ -585,11 +585,13 @@ def main():
             return '<span style="background:#e53935;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
 
     if (('buscar_btn' in locals() and buscar_btn) or ('buscar_btn' in globals() and buscar_btn)) and placa_buscar.strip() and 'rrvsac_status' in locals():
-        st.markdown(f'<div style="text-align:center; margin-bottom: 0.8rem;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
+        st.markdown(f'''<div style="width:90vw;max-width:800px;margin:0.2rem auto;display:flex;justify-content:center;">
+            {etiqueta_rrvsac(rrvsac_status)}
+        </div>''', unsafe_allow_html=True)
 
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales and len(st.session_state.resultados_actuales) > 0:
-        st.markdown('<div class="results-container">', unsafe_allow_html=True)
+        st.markdown('<div class="results-container" style="margin-top: 0.8rem;">', unsafe_allow_html=True)
         st.subheader("📊 Resultados Encontrados")
         df_resultados = pd.DataFrame([
             {
