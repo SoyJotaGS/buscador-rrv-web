@@ -376,71 +376,15 @@ class BuscadorPlacasWeb:
 def main():
     # Configuración de la página
     st.set_page_config(
-        page_title="BUSCADOR RRV",
+        page_title="🔍 Buscador RRV",
         page_icon="🔍",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
     
-    # CSS personalizado para mejorar el diseño
-    st.markdown("""
-    <style>
-    body, .stApp {
-        background: #181c23 !important;
-    }
-    .main-header {
-        background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
-        padding: 2rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        text-align: center;
-        color: white;
-    }
-    .search-container {
-        background: #23272f;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-        color: #fff;
-    }
-    .results-container {
-        background: #23272f;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        color: #fff;
-    }
-    .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
-        background: transparent !important;
-    }
-    .stButton>button {
-        background: #e53935 !important;
-        color: #fff !important;
-        border-radius: 8px !important;
-        font-weight: bold;
-    }
-    .stTextInput>div>input {
-        background: #23272f !important;
-        color: #fff !important;
-        border-radius: 8px !important;
-    }
-    .stAlert {
-        border-radius: 8px !important;
-    }
-    .stExpanderHeader {
-        color: #2196F3 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
     # Header principal
-    st.markdown("""
-    <div class="main-header">
-        <h1>🔍 BUSCADOR RRV</h1>
-        <p>Sistema de búsqueda de placas en Google Sheets</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.title("🔍 BUSCADOR RRV")
+    st.markdown("Sistema de búsqueda de placas en Google Sheets")
     
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
@@ -454,7 +398,6 @@ def main():
     st.success("✅ Sistema conectado y listo para buscar.")
     
     # Buscar Placa
-    st.markdown('<div class="search-container">', unsafe_allow_html=True)
     st.subheader("📋 Buscar Placa")
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -466,7 +409,6 @@ def main():
     with col2:
         st.write("")  # Espaciado
         buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
     
     # Ejecutar búsquedas en paralelo
     if buscar_btn and placa_buscar.strip():
@@ -490,25 +432,21 @@ def main():
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
-    
-    def etiqueta_rrvsac(valor):
-        if valor == 'ACTIVO':
-            return '<span style="background:#43a047;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
+        
+        # Mostrar estado de RRVSAC
+        if rrvsac_status == 'ACTIVO':
+            st.success("✅ ACTIVO EN PLATAFORMA")
         else:
-            return '<span style="background:#e53935;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
-
-    # Mostrar etiqueta de estado solo después de la búsqueda
-    if buscar_btn and placa_buscar.strip() and 'rrvsac_status' in locals():
-        st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
+            st.error("❌ NO ACTIVO EN PLATAFORMA")
 
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales:
-        st.markdown('<div class="results-container">', unsafe_allow_html=True)
         col1, col2 = st.columns([2, 1])
         with col1:
             st.subheader("📊 Resultados Encontrados")
         with col2:
             st.metric("Total Registros", len(st.session_state.resultados_actuales))
+        
         df_resultados = pd.DataFrame([
             {
                 'FECHA': resultado['fecha'],
@@ -520,11 +458,13 @@ def main():
             }
             for resultado in st.session_state.resultados_actuales
         ])
+        
         st.dataframe(
             df_resultados,
             use_container_width=True,
             hide_index=True
         )
+        
         st.subheader("🔍 Detalles Completos")
         for i, resultado in enumerate(st.session_state.resultados_actuales):
             orden_cronologico = "🕒 Más Reciente" if i == 0 else f"📅 Registro #{i+1}"
@@ -541,12 +481,14 @@ def main():
                     st.write(f"**Fecha:** {resultado['fecha']}")
                     st.write(f"**Empresa:** {resultado['empresa']}")
                     st.write(f"**Estado:** {resultado['trabajo']}")
+                
                 st.markdown("**📄 Datos Completos de la Fila**")
                 df_detalle = pd.DataFrame({
                     'Campo': resultado['encabezados'],
                     'Valor': resultado['datos_completos']
                 })
                 st.dataframe(df_detalle, use_container_width=True, hide_index=True)
+                
                 excel_bytes = app.crear_excel_bytes(resultado)
                 if excel_bytes:
                     st.download_button(
@@ -556,17 +498,10 @@ def main():
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         key=f"download_{i}"
                     )
-        st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer
     st.markdown("---")
-    st.markdown(
-        "<div style='text-align: center; color: #666; font-size: 0.9em;'>"
-        f"🕒 Última actualización: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | "
-        "🔗 Ejecutándose en GitHub Codespaces"
-        "</div>",
-        unsafe_allow_html=True
-    )
+    st.caption(f"🕒 Última actualización: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | 🔗 Sistema RRV - Búsqueda de Placas")
 
 if __name__ == "__main__":
     main()
