@@ -241,6 +241,55 @@ class BuscadorPlacasWeb:
         
         return resultados_ordenados
     
+    def calcular_estadisticas_cronologicas(self, resultados):
+        """Calcula estadísticas cronológicas de los resultados"""
+        if not resultados or len(resultados) < 2:
+            return None
+        
+        try:
+            from dateutil import parser
+            
+            # Parsear fechas
+            fechas_parseadas = []
+            for resultado in resultados:
+                if resultado['fecha'] != "No disponible":
+                    try:
+                        fecha = parser.parse(resultado['fecha'])
+                        fechas_parseadas.append(fecha)
+                    except:
+                        continue
+            
+            if len(fechas_parseadas) < 2:
+                return None
+            
+            # Calcular estadísticas
+            fechas_parseadas.sort(reverse=True)  # Más reciente primero
+            
+            # Rango total
+            rango_total = fechas_parseadas[0] - fechas_parseadas[-1]
+            
+            # Intervalos entre registros
+            intervalos = []
+            for i in range(len(fechas_parseadas) - 1):
+                intervalo = fechas_parseadas[i] - fechas_parseadas[i + 1]
+                intervalos.append(intervalo)
+            
+            # Estadísticas
+            stats = {
+                'total_dias': rango_total.days,
+                'total_horas': rango_total.total_seconds() / 3600,
+                'promedio_intervalo_dias': sum([i.days for i in intervalos]) / len(intervalos) if intervalos else 0,
+                'promedio_intervalo_horas': sum([i.total_seconds() for i in intervalos]) / (len(intervalos) * 3600) if intervalos else 0,
+                'registro_mas_reciente': fechas_parseadas[0],
+                'registro_mas_antiguo': fechas_parseadas[-1],
+                'total_registros_con_fecha': len(fechas_parseadas)
+            }
+            
+            return stats
+            
+        except Exception as e:
+            return None
+    
     def crear_excel_bytes(self, resultado):
         """Crea un archivo Excel en memoria y devuelve los bytes"""
         try:
@@ -479,27 +528,247 @@ def main():
             hide_index=True
         )
         
-        # Línea de tiempo cronológica
+        # Panel de estadísticas cronológicas
+        stats = app.calcular_estadisticas_cronologicas(st.session_state.resultados_actuales)
+        if stats:
+            st.subheader("📊 Estadísticas Cronológicas")
+            
+            # Crear métricas con diseño mejorado
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric(
+                    "📅 Rango Total", 
+                    f"{stats['total_dias']} días",
+                    help="Diferencia entre el registro más reciente y más antiguo"
+                )
+            
+            with col2:
+                st.metric(
+                    "⏱️ Promedio Intervalo", 
+                    f"{stats['promedio_intervalo_dias']:.1f} días",
+                    help="Tiempo promedio entre registros consecutivos"
+                )
+            
+            with col3:
+                st.metric(
+                    "🕒 Total Horas", 
+                    f"{stats['total_horas']:.1f} horas",
+                    help="Rango total en horas"
+                )
+            
+            with col4:
+                st.metric(
+                    "📋 Registros con Fecha", 
+                    f"{stats['total_registros_con_fecha']}/{len(st.session_state.resultados_actuales)}",
+                    help="Registros que tienen fecha válida"
+                )
+            
+            # Información adicional
+            col1, col2 = st.columns(2)
+            with col1:
+                st.info(f"**📅 Registro más reciente:** {stats['registro_mas_reciente'].strftime('%d/%m/%Y %H:%M:%S')}")
+            with col2:
+                st.info(f"**📅 Registro más antiguo:** {stats['registro_mas_antiguo'].strftime('%d/%m/%Y %H:%M:%S')}")
+        
+        # Línea de tiempo cronológica mejorada
         st.subheader("📅 Línea de Tiempo Cronológica")
         
-        # Crear una línea de tiempo visual
-        timeline_html = """
-        <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-            <h4 style="color: #2196F3; margin-bottom: 15px;">🕒 Orden Cronológico de Registros</h4>
+        # Filtros de visualización
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            mostrar_detalles = st.checkbox("Mostrar detalles completos", value=True, help="Muestra información adicional como empresa, estado y servicio")
+        with col2:
+            mostrar_tiempo = st.checkbox("Mostrar intervalos de tiempo", value=True, help="Muestra el tiempo transcurrido entre registros")
+        
+        # CSS personalizado para la línea de tiempo
+        timeline_css = """
+        <style>
+        .timeline-container {
+            position: relative;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .timeline-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .timeline-item {
+            position: relative;
+            margin: 20px 0;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #2196F3;
+            transition: all 0.3s ease;
+        }
+        .timeline-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .timeline-item.recent {
+            border-left-color: #4CAF50;
+            background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+        }
+        .timeline-item.old {
+            border-left-color: #FF9800;
+            background: linear-gradient(135deg, #fffbf8 0%, #fff3e0 100%);
+        }
+        .timeline-icon {
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+        }
+        .timeline-icon.recent {
+            background: #4CAF50;
+        }
+        .timeline-icon.old {
+            background: #FF9800;
+        }
+        .timeline-icon.middle {
+            background: #2196F3;
+        }
+        .timeline-content {
+            margin-left: 20px;
+        }
+        .timeline-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        .timeline-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        .timeline-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .timeline-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+        .timeline-badge.empresa {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        .timeline-badge.estado {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+        .timeline-badge.servicio {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        .timeline-connector {
+            position: absolute;
+            left: 0;
+            top: 100%;
+            width: 2px;
+            height: 20px;
+            background: #2196F3;
+        }
+        .timeline-connector:last-child {
+            display: none;
+        }
+        </style>
         """
+        
+        # Crear línea de tiempo mejorada
+        timeline_html = timeline_css + """
+        <div class="timeline-container">
+            <div class="timeline-header">
+                🕒 Línea de Tiempo Cronológica - {total_registros} Registros Encontrados
+            </div>
+        """.format(total_registros=len(st.session_state.resultados_actuales))
         
         for i, resultado in enumerate(st.session_state.resultados_actuales):
             fecha_formateada = resultado['fecha'] if resultado['fecha'] != "No disponible" else "Fecha no disponible"
-            icono = "🟢" if i == 0 else "🔵"
+            
+            # Determinar el tipo de registro y estilos
+            if i == 0:
+                item_class = "recent"
+                icon_class = "recent"
+                icon_text = "🟢"
+                badge_text = "MÁS RECIENTE"
+            elif i == len(st.session_state.resultados_actuales) - 1:
+                item_class = "old"
+                icon_class = "old"
+                icon_text = "🟠"
+                badge_text = "MÁS ANTIGUO"
+            else:
+                item_class = ""
+                icon_class = "middle"
+                icon_text = "🔵"
+                badge_text = f"REGISTRO #{i+1}"
+            
+            # Calcular tiempo transcurrido si es posible
+            tiempo_info = ""
+            if mostrar_tiempo and i > 0 and resultado['fecha'] != "No disponible":
+                try:
+                    from dateutil import parser
+                    fecha_actual = parser.parse(resultado['fecha'])
+                    fecha_anterior = parser.parse(st.session_state.resultados_actuales[i-1]['fecha'])
+                    diferencia = fecha_anterior - fecha_actual
+                    if diferencia.days > 0:
+                        tiempo_info = f"<br><small style='color: #999;'>⏱️ {diferencia.days} días después</small>"
+                    elif diferencia.seconds > 0:
+                        horas = diferencia.seconds // 3600
+                        tiempo_info = f"<br><small style='color: #999;'>⏱️ {horas} horas después</small>"
+                except:
+                    pass
+            
+            # Generar detalles según el filtro
+            detalles_html = ""
+            if mostrar_detalles:
+                detalles_html = f"""
+                    <div class="timeline-details">
+                        <span class="timeline-badge">🚗 {resultado['placa']}</span>
+                        <span class="timeline-badge empresa">🏢 {resultado['empresa']}</span>
+                        <span class="timeline-badge estado">📋 {resultado['trabajo']}</span>
+                        <span class="timeline-badge servicio">🔧 {resultado['pestana']}</span>
+                    </div>
+                """
+            
             timeline_html += f"""
-            <div style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: white; border-radius: 5px; border-left: 4px solid #2196F3;">
-                <span style="font-size: 20px; margin-right: 15px;">{icono}</span>
-                <div>
-                    <strong>Registro #{i+1}</strong> - {fecha_formateada}<br>
-                    <small style="color: #666;">Placa: {resultado['placa']} | Empresa: {resultado['empresa']} | Estado: {resultado['trabajo']}</small>
+            <div class="timeline-item {item_class}">
+                <div class="timeline-icon {icon_class}">{icon_text}</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">{badge_text}</div>
+                    <div class="timeline-date">📅 {fecha_formateada}{tiempo_info}</div>
+                    {detalles_html}
                 </div>
             </div>
             """
+            
+            # Agregar conector si no es el último elemento
+            if i < len(st.session_state.resultados_actuales) - 1:
+                timeline_html += '<div class="timeline-connector"></div>'
         
         timeline_html += "</div>"
         st.markdown(timeline_html, unsafe_allow_html=True)
