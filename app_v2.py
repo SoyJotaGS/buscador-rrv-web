@@ -434,39 +434,29 @@ def main():
         
         /* Header principal moderno */
         .main-header {
-            background: var(--gradient-primary);
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            margin: 1rem 0 2rem 0;
+            background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
+            padding: 1.2rem 1rem;
+            border-radius: 12px;
+            margin: 0.5rem 0 0.5rem 0;
             text-align: center;
             color: white;
-            box-shadow: var(--shadow-medium);
+            box-shadow: none;
             position: relative;
             overflow: hidden;
         }
         
-        .main-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-            pointer-events: none;
-        }
-        
         .main-header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.08);
         }
         
         .main-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+            font-size: 1rem;
+            opacity: 0.92;
             font-weight: 400;
+            margin-bottom: 0;
         }
         
         /* Contenedores modernos */
@@ -628,39 +618,29 @@ def main():
         
         /* Header principal moderno */
         .main-header {
-            background: var(--gradient-primary);
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            margin: 1rem 0 2rem 0;
+            background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
+            padding: 1.2rem 1rem;
+            border-radius: 12px;
+            margin: 0.5rem 0 0.5rem 0;
             text-align: center;
             color: white;
-            box-shadow: var(--shadow-medium);
+            box-shadow: none;
             position: relative;
             overflow: hidden;
         }
         
-        .main-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-            pointer-events: none;
-        }
-        
         .main-header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.08);
         }
         
         .main-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+            font-size: 1rem;
+            opacity: 0.92;
             font-weight: 400;
+            margin-bottom: 0;
         }
         
         /* Contenedores modernos */
