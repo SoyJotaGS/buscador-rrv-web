@@ -374,16 +374,9 @@ class BuscadorPlacasWeb:
             return None
 
 def main():
-    # CSS moderno y elegante SOLO tema oscuro mejorado
+    # CSS moderno y elegante optimizado
     css_tema = """
     <style>
-    .rrv-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-    }
     :root {
         --bg-primary: #181a20;
         --bg-secondary: #23262f;
@@ -399,149 +392,194 @@ def main():
         --gradient-primary: linear-gradient(90deg, #4f8cff 0%, #6a82fb 100%);
         --gradient-secondary: linear-gradient(90deg, #ff5e62 0%, #ff9966 100%);
     }
+    
     body, .stApp {
         background: var(--bg-primary) !important;
         color: var(--text-primary) !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    h1.rrv-title {
-        font-size:1.3rem;
-        font-weight:600;
-        text-align:center;
-        margin-top:0 !important;
-        margin-bottom:0.2rem;
-        color:#f1f1f1;
-        padding-top:0 !important;
-    }
-    .rrv-subtitle {
-        font-size:1rem;
-        opacity:0.92;
-        font-weight:400;
-        text-align:center;
-        margin-top:0 !important;
-        margin-bottom:1.2rem;
-        color:#b0b3c2;
-        padding-top:0 !important;
-    }
-    .main-header, .search-container, .status-container, .results-container {
-        width: 90vw;
+    
+    .main-container {
         max-width: 800px;
-        margin: 0.2rem 0 0.2rem 0;
-        display: block;
+        margin: 0 auto;
+        padding: 1rem;
     }
-    .status-container {
-        background: var(--bg-secondary);
-        min-height: 36px;
-        border-radius: 14px;
-        box-shadow: var(--shadow-light);
+    
+    .title-section {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 0;
+    }
+    
+    .rrv-title {
+        font-size: 1.8rem;
+        font-weight: 700;
         color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .rrv-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin: 0;
+        font-weight: 400;
+    }
+    
+    .search-section {
+        background: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
         border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .status-section {
         display: flex;
-        align-items: center;
         justify-content: center;
-        margin: 0.2rem 0 0.2rem 0;
-        font-size: 1.15rem;
-        font-weight: 500;
-        padding: 6px 0;
-        transition: all 0.3s ease;
+        margin: 1rem 0;
     }
-    .search-container, .results-container {
-        background: var(--bg-secondary);
-        padding: 2.2rem 1.5rem;
-        border-radius: 14px;
+    
+    .status-badge {
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-align: center;
         box-shadow: var(--shadow-light);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        backdrop-filter: blur(6px);
         transition: all 0.3s ease;
     }
-    .search-container:hover, .results-container:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-medium);
+    
+    .status-active {
+        background: linear-gradient(135deg, #43a047 0%, #4caf50 100%);
+        color: white;
     }
+    
+    .status-inactive {
+        background: linear-gradient(135deg, #e53935 0%, #f44336 100%);
+        color: white;
+    }
+    
+    .results-section {
+        background: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+    }
+    
     .stButton > button {
         background: var(--gradient-secondary) !important;
         color: white !important;
         border: none !important;
         border-radius: 12px !important;
         font-weight: 600 !important;
-        padding: 0.75rem 1.5rem !important;
+        padding: 0.875rem 2rem !important;
         font-size: 1rem !important;
         transition: all 0.3s ease !important;
         box-shadow: var(--shadow-light) !important;
+        width: 100% !important;
     }
+    
     .stButton > button:hover {
-        transform: translateY(-1px) !important;
+        transform: translateY(-2px) !important;
         box-shadow: var(--shadow-medium) !important;
     }
+    
     .stTextInput > div > div > input {
         background: var(--bg-tertiary) !important;
         color: var(--text-primary) !important;
         border: 2px solid var(--border-color) !important;
         border-radius: 12px !important;
-        padding: 1rem !important;
+        padding: 1rem 1.25rem !important;
         font-size: 1rem !important;
         transition: all 0.3s ease !important;
     }
+    
     .stTextInput > div > div > input:focus {
         border-color: var(--accent-primary) !important;
-        box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.12) !important;
+        box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15) !important;
     }
+    
     .stDataFrame, .stTable {
         background: transparent !important;
         color: var(--text-primary) !important;
     }
+    
     .stDataFrame > div {
         border-radius: 12px !important;
         overflow: hidden !important;
         box-shadow: var(--shadow-light) !important;
     }
+    
     .stExpander {
-        background: var(--bg-secondary) !important;
+        background: var(--bg-tertiary) !important;
         border-radius: 12px !important;
         border: 1px solid var(--border-color) !important;
         margin-bottom: 1rem !important;
+        box-shadow: var(--shadow-light) !important;
     }
+    
     .stExpanderHeader {
         color: var(--accent-primary) !important;
         font-weight: 600 !important;
         padding: 1rem !important;
+        border-radius: 12px !important;
     }
+    
     .stAlert {
         border-radius: 12px !important;
         border: none !important;
         box-shadow: var(--shadow-light) !important;
     }
+    
     .stMetric {
         background: var(--bg-secondary) !important;
         border-radius: 12px !important;
         padding: 1rem !important;
         border: 1px solid var(--border-color) !important;
     }
+    
     p, h1, h2, h3, h4, h5, h6 {
         color: var(--text-primary) !important;
     }
+    
     ::-webkit-scrollbar {
         width: 8px;
     }
+    
     ::-webkit-scrollbar-track {
         background: var(--bg-secondary);
     }
+    
     ::-webkit-scrollbar-thumb {
         background: var(--accent-primary);
         border-radius: 4px;
     }
+    
     ::-webkit-scrollbar-thumb:hover {
         background: var(--accent-secondary);
     }
     </style>
     """
     st.markdown(css_tema, unsafe_allow_html=True)
-    st.markdown('<div class="rrv-wrapper">', unsafe_allow_html=True)
 
-    # Título y subtítulo sin contenedor visual, sin margen superior
+    # Contenedor principal
+    st.markdown('<div class="main-container">', unsafe_allow_html=True)
+
+    # Título y subtítulo optimizados
+    st.markdown('<div class="title-section">', unsafe_allow_html=True)
     st.markdown('<h1 class="rrv-title">🔍 BUSCADOR RRV</h1>', unsafe_allow_html=True)
-    st.markdown('<div class="rrv-subtitle">Consultas de base de datos y plataforma</div>', unsafe_allow_html=True)
+    st.markdown('<p class="rrv-subtitle">Consultas de base de datos y plataforma</p>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
@@ -553,7 +591,8 @@ def main():
         st.markdown('</div>', unsafe_allow_html=True)
         return
 
-    # Buscador de placas sin contenedor visual
+    # Sección de búsqueda
+    st.markdown('<div class="search-section">', unsafe_allow_html=True)
     st.subheader("📋 Buscar Placa")
     placa_buscar = st.text_input(
         "Ingresa la placa a buscar:",
@@ -561,6 +600,11 @@ def main():
         key="placa_input"
     )
     buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Variables para el estado
+    rrvsac_status = None
+    resultados_ordenados = []
 
     # Ejecutar búsquedas en paralelo
     if buscar_btn and placa_buscar.strip():
@@ -570,29 +614,28 @@ def main():
                 future_api = executor.submit(app.consultar_api_rrvsac, placa_buscar.strip())
                 resultados = future_sheets.result()
                 rrvsac_status = future_api.result()
+        
         resultados_ordenados = app.ordenar_resultados_cronologicamente(resultados)
         st.session_state.resultados_actuales = resultados_ordenados
+        
         if not resultados_ordenados:
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
 
-    # Mostrar la etiqueta de estado solo si hay búsqueda y estado, centrada y sin contenedor
-    def etiqueta_rrvsac(valor):
-        if valor == 'ACTIVO':
-            return '<span style="background:#43a047;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
-        else:
-            return '<span style="background:#e53935;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
-
-    if (('buscar_btn' in locals() and buscar_btn) or ('buscar_btn' in globals() and buscar_btn)) and placa_buscar.strip() and 'rrvsac_status' in locals():
-        st.markdown(f'''<div style="width:90vw;max-width:800px;margin:0.2rem auto;display:flex;justify-content:center;">
-            {etiqueta_rrvsac(rrvsac_status)}
-        </div>''', unsafe_allow_html=True)
+    # Mostrar estado de RRVSAC
+    if buscar_btn and placa_buscar.strip() and rrvsac_status:
+        st.markdown('<div class="status-section">', unsafe_allow_html=True)
+        status_class = "status-active" if rrvsac_status == 'ACTIVO' else "status-inactive"
+        status_text = "ACTIVO EN PLATAFORMA" if rrvsac_status == 'ACTIVO' else "NO ACTIVO EN PLATAFORMA"
+        st.markdown(f'<div class="status-badge {status_class}">{status_text}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales and len(st.session_state.resultados_actuales) > 0:
-        st.markdown('<div class="results-container" style="margin-top: 0.8rem;">', unsafe_allow_html=True)
+        st.markdown('<div class="results-section">', unsafe_allow_html=True)
         st.subheader("📊 Resultados Encontrados")
+        
         df_resultados = pd.DataFrame([
             {
                 'FECHA': resultado['fecha'],
@@ -604,11 +647,13 @@ def main():
             }
             for resultado in st.session_state.resultados_actuales
         ])
+        
         st.dataframe(
             df_resultados,
             use_container_width=True,
             hide_index=True
         )
+        
         st.subheader("🔍 Detalles Completos")
         for i, resultado in enumerate(st.session_state.resultados_actuales):
             orden_cronologico = "🕒 Más Reciente" if i == 0 else f"📅 Registro #{i+1}"
@@ -625,12 +670,14 @@ def main():
                     st.write(f"**Fecha:** {resultado['fecha']}")
                     st.write(f"**Empresa:** {resultado['empresa']}")
                     st.write(f"**Estado:** {resultado['trabajo']}")
+                
                 st.markdown("**📄 Datos Completos de la Fila**")
                 df_detalle = pd.DataFrame({
                     'Campo': resultado['encabezados'],
                     'Valor': resultado['datos_completos']
                 })
                 st.dataframe(df_detalle, use_container_width=True, hide_index=True)
+                
                 excel_bytes = app.crear_excel_bytes(resultado)
                 if excel_bytes:
                     st.download_button(
@@ -640,7 +687,11 @@ def main():
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         key=f"download_{i}"
                     )
+        
         st.markdown('</div>', unsafe_allow_html=True)
+
+    # Cerrar contenedor principal
+    st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
