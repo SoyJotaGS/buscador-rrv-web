@@ -9,6 +9,9 @@ import pandas as pd
 import io
 import json
 import tempfile
+import requests
+import concurrent.futures
+import threading
 
 class BuscadorPlacasWeb:
     def __init__(self):
@@ -182,6 +185,98 @@ class BuscadorPlacasWeb:
                 return i
         return 5 if len(encabezados) > 5 else 0
     
+    def ordenar_resultados_cronologicamente(self, resultados):
+        """Ordena los resultados por fecha de manera cronológica"""
+        def parsear_fecha(fecha_str):
+            """Intenta parsear diferentes formatos de fecha"""
+            if not fecha_str or fecha_str == "No disponible":
+                return datetime.min
+            
+            fecha_str = str(fecha_str).strip()
+            
+            # Limpiar la fecha de caracteres extra
+            fecha_str = fecha_str.replace('  ', ' ').strip()
+            
+            # Formatos comunes de fecha (ordenados de más específico a más general)
+            formatos = [
+                '%d/%m/%Y %H:%M:%S',
+                '%d/%m/%Y %H:%M',
+                '%d/%m/%Y',
+                '%Y-%m-%d %H:%M:%S',
+                '%Y-%m-%d %H:%M',
+                '%Y-%m-%d',
+                '%d-%m-%Y %H:%M:%S',
+                '%d-%m-%Y %H:%M',
+                '%d-%m-%Y',
+                '%m/%d/%Y %H:%M:%S',
+                '%m/%d/%Y %H:%M',
+                '%m/%d/%Y',
+                '%d/%m/%y %H:%M:%S',
+                '%d/%m/%y %H:%M',
+                '%d/%m/%y',
+                '%d.%m.%Y %H:%M:%S',
+                '%d.%m.%Y %H:%M',
+                '%d.%m.%Y'
+            ]
+            
+            for formato in formatos:
+                try:
+                    return datetime.strptime(fecha_str, formato)
+                except ValueError:
+                    continue
+            
+            # Si no se puede parsear, intentar con dateutil
+            try:
+                from dateutil import parser
+                return parser.parse(fecha_str)
+            except:
+                pass
+            
+            # Si no se puede parsear, devolver fecha mínima
+            return datetime.min
+        
+        # Ordenar por fecha (más reciente primero)
+        resultados_ordenados = sorted(
+            resultados, 
+            key=lambda x: parsear_fecha(x['fecha']), 
+            reverse=True
+        )
+        
+        return resultados_ordenados
+    
+    def consultar_api_rrvsac(self, placa):
+        """Consulta la API de RRVSAC para verificar el estado de una placa"""
+        try:
+            url = 'https://plataforma.rrvsac.com/api/vehicles'
+            params = {'search.info.license_plate': placa.strip()}
+            headers = {
+                'authenticate': 'e843453d60c9b826ed4704f77a88ab6fb4bcb9cd88b2ce25e600cd5b',
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive'
+            }
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                # Buscar campo 'id' dentro de la estructura 'data'
+                if data and isinstance(data, dict) and 'data' in data:
+                    data_content = data['data']
+                    # Si data es una lista, buscar en el primer elemento
+                    if isinstance(data_content, list) and data_content:
+                        first_item = data_content[0]
+                        if isinstance(first_item, dict) and 'id' in first_item:
+                            return 'ACTIVO'
+                    # Si data es un diccionario, buscar directamente
+                    elif isinstance(data_content, dict) and 'id' in data_content:
+                        return 'ACTIVO'
+                return 'NO ACTIVO'
+            else:
+                return 'NO ACTIVO'
+        except Exception as e:
+            st.error(f"Error al consultar la API de RRVSAC: {str(e)}")
+            return 'NO ACTIVO'
+    
     def crear_excel_bytes(self, resultado):
         """Crea un archivo Excel en memoria y devuelve los bytes"""
         try:
@@ -274,7 +369,6 @@ class BuscadorPlacasWeb:
             wb.close()
             
             return output.getvalue()
-            
         except Exception as e:
             st.error(f"Error al crear archivo Excel: {str(e)}")
             return None
@@ -291,6 +385,9 @@ def main():
     # CSS personalizado para mejorar el diseño
     st.markdown("""
     <style>
+    body, .stApp {
+        background: #181c23 !important;
+    }
     .main-header {
         background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
         padding: 2rem;
@@ -300,17 +397,39 @@ def main():
         color: white;
     }
     .search-container {
-        background: white;
+        background: #23272f;
         padding: 2rem;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         margin-bottom: 2rem;
+        color: #fff;
     }
     .results-container {
-        background: white;
+        background: #23272f;
         padding: 2rem;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        color: #fff;
+    }
+    .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
+        background: transparent !important;
+    }
+    .stButton>button {
+        background: #e53935 !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        font-weight: bold;
+    }
+    .stTextInput>div>input {
+        background: #23272f !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+    }
+    .stAlert {
+        border-radius: 8px !important;
+    }
+    .stExpanderHeader {
+        color: #2196F3 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -334,104 +453,100 @@ def main():
     
     st.success("✅ Sistema conectado y listo para buscar.")
     
-    # Container de búsqueda
-    with st.container():
-        st.markdown('<div class="search-container">', unsafe_allow_html=True)
-        
-        st.subheader("📋 Buscar Placa")
-        
-        col1, col2 = st.columns([3, 1])
-        
-        with col1:
-            placa_buscar = st.text_input(
-                "Ingresa la placa a buscar:",
-                placeholder="Ej: ABC-123",
-                key="placa_input"
-            )
-        
-        with col2:
-            st.write("")  # Espaciado
-            buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Buscar Placa
+    st.markdown('<div class="search-container">', unsafe_allow_html=True)
+    st.subheader("📋 Buscar Placa")
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        placa_buscar = st.text_input(
+            "Ingresa la placa a buscar:",
+            placeholder="Ej: ABC-123",
+            key="placa_input"
+        )
+    with col2:
+        st.write("")  # Espaciado
+        buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Ejecutar búsqueda
+    # Ejecutar búsquedas en paralelo
     if buscar_btn and placa_buscar.strip():
-        resultados = app.buscar_placas_en_drive(placa_buscar.strip())
-        st.session_state.resultados_actuales = resultados
+        with st.spinner('🔍 Buscando en Google Sheets y consultando API de RRVSAC en paralelo...'):
+            # Ejecutar ambas búsquedas en paralelo
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                # Búsqueda en Google Sheets
+                future_sheets = executor.submit(app.buscar_placas_en_drive, placa_buscar.strip())
+                # Consulta a la API de RRVSAC
+                future_api = executor.submit(app.consultar_api_rrvsac, placa_buscar.strip())
+                
+                # Obtener resultados
+                resultados = future_sheets.result()
+                rrvsac_status = future_api.result()
         
-        if not resultados:
+        # Procesar resultados de Google Sheets
+        resultados_ordenados = app.ordenar_resultados_cronologicamente(resultados)
+        st.session_state.resultados_actuales = resultados_ordenados
+        
+        if not resultados_ordenados:
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
-            st.success(f"✅ Se encontraron {len(resultados)} registro(s)")
+            st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
     
+    def etiqueta_rrvsac(valor):
+        if valor == 'ACTIVO':
+            return '<span style="background:#43a047;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
+        else:
+            return '<span style="background:#e53935;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
+
+    # Mostrar etiqueta de estado solo después de la búsqueda
+    if buscar_btn and placa_buscar.strip() and 'rrvsac_status' in locals():
+        st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
+
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales:
         st.markdown('<div class="results-container">', unsafe_allow_html=True)
-        
-        # Header de resultados
         col1, col2 = st.columns([2, 1])
-        
         with col1:
             st.subheader("📊 Resultados Encontrados")
-        
         with col2:
             st.metric("Total Registros", len(st.session_state.resultados_actuales))
-        
-        # Crear DataFrame para mostrar los resultados
         df_resultados = pd.DataFrame([
             {
                 'FECHA': resultado['fecha'],
                 'PLACA': resultado['placa'],
                 'EMPRESA': resultado['empresa'],
                 'ÚLTIMO ESTADO': resultado['trabajo'],
-                'SERVICIO': resultado['pestana'],
+                'SISTEMA': resultado['sistema'],
                 'HOJA': resultado['hoja']
             }
             for resultado in st.session_state.resultados_actuales
         ])
-        
-        # Mostrar tabla
         st.dataframe(
             df_resultados,
             use_container_width=True,
             hide_index=True
         )
-        
-        # Mostrar detalles expandibles
         st.subheader("🔍 Detalles Completos")
-        
         for i, resultado in enumerate(st.session_state.resultados_actuales):
-            with st.expander(f"📋 Registro #{i+1} - Placa: {resultado['placa']} ({resultado['fecha']})"):
-                
-                # Información básica
+            orden_cronologico = "🕒 Más Reciente" if i == 0 else f"📅 Registro #{i+1}"
+            with st.expander(f"{orden_cronologico} - Placa: {resultado['placa']} ({resultado['fecha']})"):
                 col1, col2 = st.columns(2)
-                
                 with col1:
                     st.markdown("**📍 Ubicación del Registro**")
                     st.write(f"**Hoja:** {resultado['hoja']}")
-                    st.write(f"**Pestaña:** {resultado['pestana']}")
+                    st.write(f"**Sistema:** {resultado['sistema']}")
                     st.write(f"**Fila:** {resultado['fila']}")
-                
                 with col2:
                     st.markdown("**📊 Información Principal**")
                     st.write(f"**Placa:** {resultado['placa']}")
                     st.write(f"**Fecha:** {resultado['fecha']}")
                     st.write(f"**Empresa:** {resultado['empresa']}")
                     st.write(f"**Estado:** {resultado['trabajo']}")
-                
-                # Todos los datos de la fila
                 st.markdown("**📄 Datos Completos de la Fila**")
-                
-                # Crear DataFrame con todos los datos
                 df_detalle = pd.DataFrame({
                     'Campo': resultado['encabezados'],
                     'Valor': resultado['datos_completos']
                 })
-                
                 st.dataframe(df_detalle, use_container_width=True, hide_index=True)
-                
-                # Botón de descarga individual
                 excel_bytes = app.crear_excel_bytes(resultado)
                 if excel_bytes:
                     st.download_button(
@@ -441,7 +556,6 @@ def main():
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         key=f"download_{i}"
                     )
-        
         st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer
