@@ -394,397 +394,6 @@ def main():
     if 'tema' not in st.session_state:
         st.session_state.tema = "oscuro"
     
-    # Botón toggle de tema moderno
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col1:
-        if st.button(
-            "🌙" if st.session_state.tema == "claro" else "☀️",
-            help="Cambiar tema",
-            key="theme_toggle"
-        ):
-            st.session_state.tema = "claro" if st.session_state.tema == "oscuro" else "oscuro"
-    
-    # CSS moderno y elegante con temas claro y oscuro
-    if st.session_state.tema == "oscuro":
-        css_tema = """
-        <style>
-        /* Variables CSS para tema oscuro */
-        :root {
-            --bg-primary: #0f1419;
-            --bg-secondary: #1a1f2e;
-            --bg-tertiary: #2d3748;
-            --text-primary: #f7fafc;
-            --text-secondary: #e2e8f0;
-            --text-muted: #a0aec0;
-            --accent-primary: #3182ce;
-            --accent-secondary: #4299e1;
-            --border-color: #4a5568;
-            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        
-        /* Estilos base */
-        body, .stApp {
-            background: var(--bg-primary) !important;
-            color: var(--text-primary) !important;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-        }
-        
-        /* Header principal moderno */
-        .main-header {
-            background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
-            padding: 1.2rem 1rem;
-            border-radius: 12px;
-            margin: 0.5rem 0 0.5rem 0;
-            text-align: center;
-            color: white;
-            box-shadow: none;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .main-header h1 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 0.2rem;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.08);
-        }
-        
-        .main-header p {
-            font-size: 1rem;
-            opacity: 0.92;
-            font-weight: 400;
-            margin-bottom: 0;
-        }
-        
-        /* Contenedores modernos */
-        .search-container, .results-container {
-            background: var(--bg-secondary);
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: var(--shadow-light);
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        
-        .search-container:hover, .results-container:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-        
-        /* Botones modernos */
-        .stButton > button {
-            background: var(--gradient-secondary) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 12px !important;
-            font-weight: 600 !important;
-            padding: 0.75rem 1.5rem !important;
-            font-size: 1rem !important;
-            transition: all 0.3s ease !important;
-            box-shadow: var(--shadow-light) !important;
-        }
-        
-        .stButton > button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: var(--shadow-medium) !important;
-        }
-        
-        /* Botón de tema */
-        .stButton > button[key="theme_toggle"] {
-            background: var(--bg-tertiary) !important;
-            border: 2px solid var(--accent-primary) !important;
-            border-radius: 50px !important;
-            width: 60px !important;
-            height: 60px !important;
-            font-size: 1.5rem !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin: 1rem 0 !important;
-        }
-        
-        /* Campos de entrada modernos */
-        .stTextInput > div > div > input {
-            background: var(--bg-tertiary) !important;
-            color: var(--text-primary) !important;
-            border: 2px solid var(--border-color) !important;
-            border-radius: 12px !important;
-            padding: 1rem !important;
-            font-size: 1rem !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .stTextInput > div > div > input:focus {
-            border-color: var(--accent-primary) !important;
-            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1) !important;
-        }
-        
-        /* Tablas y dataframes */
-        .stDataFrame, .stTable {
-            background: transparent !important;
-            color: var(--text-primary) !important;
-        }
-        
-        .stDataFrame > div {
-            border-radius: 12px !important;
-            overflow: hidden !important;
-            box-shadow: var(--shadow-light) !important;
-        }
-        
-        /* Expanders modernos */
-        .stExpander {
-            background: var(--bg-secondary) !important;
-            border-radius: 12px !important;
-            border: 1px solid var(--border-color) !important;
-            margin-bottom: 1rem !important;
-        }
-        
-        .stExpanderHeader {
-            color: var(--accent-primary) !important;
-            font-weight: 600 !important;
-            padding: 1rem !important;
-        }
-        
-        /* Alertas y métricas */
-        .stAlert {
-            border-radius: 12px !important;
-            border: none !important;
-            box-shadow: var(--shadow-light) !important;
-        }
-        
-        .stMetric {
-            background: var(--bg-secondary) !important;
-            border-radius: 12px !important;
-            padding: 1rem !important;
-            border: 1px solid var(--border-color) !important;
-        }
-        
-        /* Tipografía */
-        p, h1, h2, h3, h4, h5, h6 {
-            color: var(--text-primary) !important;
-        }
-        
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent-primary);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-secondary);
-        }
-        </style>
-        """
-    else:  # Tema Claro
-        css_tema = """
-        <style>
-        /* Variables CSS para tema claro */
-        :root {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #f1f5f9;
-            --text-primary: #1e293b;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            --accent-primary: #3b82f6;
-            --accent-secondary: #60a5fa;
-            --border-color: #e2e8f0;
-            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        
-        /* Estilos base */
-        body, .stApp {
-            background: var(--bg-primary) !important;
-            color: var(--text-primary) !important;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-        }
-        
-        /* Header principal moderno */
-        .main-header {
-            background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
-            padding: 1.2rem 1rem;
-            border-radius: 12px;
-            margin: 0.5rem 0 0.5rem 0;
-            text-align: center;
-            color: white;
-            box-shadow: none;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .main-header h1 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 0.2rem;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.08);
-        }
-        
-        .main-header p {
-            font-size: 1rem;
-            opacity: 0.92;
-            font-weight: 400;
-            margin-bottom: 0;
-        }
-        
-        /* Contenedores modernos */
-        .search-container, .results-container {
-            background: var(--bg-secondary);
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: var(--shadow-light);
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        
-        .search-container:hover, .results-container:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-        
-        /* Botones modernos */
-        .stButton > button {
-            background: var(--gradient-secondary) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 12px !important;
-            font-weight: 600 !important;
-            padding: 0.75rem 1.5rem !important;
-            font-size: 1rem !important;
-            transition: all 0.3s ease !important;
-            box-shadow: var(--shadow-light) !important;
-        }
-        
-        .stButton > button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: var(--shadow-medium) !important;
-        }
-        
-        /* Botón de tema */
-        .stButton > button[key="theme_toggle"] {
-            background: var(--bg-secondary) !important;
-            border: 2px solid var(--accent-primary) !important;
-            border-radius: 50px !important;
-            width: 60px !important;
-            height: 60px !important;
-            font-size: 1.5rem !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin: 1rem 0 !important;
-            color: var(--text-primary) !important;
-        }
-        
-        /* Campos de entrada modernos */
-        .stTextInput > div > div > input {
-            background: var(--bg-secondary) !important;
-            color: var(--text-primary) !important;
-            border: 2px solid var(--border-color) !important;
-            border-radius: 12px !important;
-            padding: 1rem !important;
-            font-size: 1rem !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .stTextInput > div > div > input:focus {
-            border-color: var(--accent-primary) !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-        }
-        
-        /* Tablas y dataframes */
-        .stDataFrame, .stTable {
-            background: transparent !important;
-            color: var(--text-primary) !important;
-        }
-        
-        .stDataFrame > div {
-            border-radius: 12px !important;
-            overflow: hidden !important;
-            box-shadow: var(--shadow-light) !important;
-        }
-        
-        /* Expanders modernos */
-        .stExpander {
-            background: var(--bg-secondary) !important;
-            border-radius: 12px !important;
-            border: 1px solid var(--border-color) !important;
-            margin-bottom: 1rem !important;
-        }
-        
-        .stExpanderHeader {
-            color: var(--accent-primary) !important;
-            font-weight: 600 !important;
-            padding: 1rem !important;
-        }
-        
-        /* Alertas y métricas */
-        .stAlert {
-            border-radius: 12px !important;
-            border: none !important;
-            box-shadow: var(--shadow-light) !important;
-        }
-        
-        .stMetric {
-            background: var(--bg-secondary) !important;
-            border-radius: 12px !important;
-            padding: 1rem !important;
-            border: 1px solid var(--border-color) !important;
-        }
-        
-        /* Tipografía */
-        p, h1, h2, h3, h4, h5, h6 {
-            color: var(--text-primary) !important;
-        }
-        
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent-primary);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-secondary);
-        }
-        </style>
-        """
-    
-    st.markdown(css_tema, unsafe_allow_html=True)
-    
-    # Header principal
-    st.markdown("""
-    <div class="main-header">
-        <h1>🔍 BUSCADOR RRV</h1>
-        <p>Consultas de base de datos y plataforma</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
     
@@ -798,42 +407,41 @@ def main():
     
     # Buscar Placa
     st.markdown('<div class="search-container">', unsafe_allow_html=True)
-    st.subheader("📋 Buscar Placa")
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        placa_buscar = st.text_input(
-            "Ingresa la placa a buscar:",
-            placeholder="Ej: ABC-123",
-            key="placa_input"
-        )
-    with col2:
-        st.write("")  # Espaciado
-        buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
+    row1_col1, row1_col2 = st.columns([6, 1])
+    with row1_col1:
+        st.subheader("📋 Buscar Placa")
+    with row1_col2:
+        # Botón de tema grande y visible, alineado a la derecha
+        if st.button(
+            "🌙" if st.session_state.tema == "claro" else "☀️",
+            help="Cambiar tema",
+            key="theme_toggle",
+            use_container_width=True
+        ):
+            st.session_state.tema = "claro" if st.session_state.tema == "oscuro" else "oscuro"
+    placa_buscar = st.text_input(
+        "Ingresa la placa a buscar:",
+        placeholder="Ej: ABC-123",
+        key="placa_input"
+    )
+    buscar_btn = st.button("🔍 Buscar", type="primary", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Ejecutar búsquedas en paralelo
     if buscar_btn and placa_buscar.strip():
         with st.spinner('🔍 Buscando en Google Sheets y consultando API de RRVSAC en paralelo...'):
-            # Ejecutar ambas búsquedas en paralelo
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                # Búsqueda en Google Sheets
                 future_sheets = executor.submit(app.buscar_placas_en_drive, placa_buscar.strip())
-                # Consulta a la API de RRVSAC
                 future_api = executor.submit(app.consultar_api_rrvsac, placa_buscar.strip())
-                
-                # Obtener resultados
                 resultados = future_sheets.result()
                 rrvsac_status = future_api.result()
-        
-        # Procesar resultados de Google Sheets
         resultados_ordenados = app.ordenar_resultados_cronologicamente(resultados)
         st.session_state.resultados_actuales = resultados_ordenados
-        
         if not resultados_ordenados:
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
-    
+
     def etiqueta_rrvsac(valor):
         if valor == 'ACTIVO':
             return '<span style="background:#43a047;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
