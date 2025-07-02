@@ -379,60 +379,147 @@ def main():
         page_title="BUSCADOR RRV",
         page_icon="🔍",
         layout="wide",
-        initial_sidebar_state="collapsed"
+        initial_sidebar_state="expanded"
     )
     
-    # CSS personalizado para mejorar el diseño
-    st.markdown("""
-    <style>
-    body, .stApp {
-        background: #181c23 !important;
-    }
-    .main-header {
-        background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
-        padding: 2rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        text-align: center;
-        color: white;
-    }
-    .search-container {
-        background: #23272f;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-        color: #fff;
-    }
-    .results-container {
-        background: #23272f;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        color: #fff;
-    }
-    .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
-        background: transparent !important;
-    }
-    .stButton>button {
-        background: #e53935 !important;
-        color: #fff !important;
-        border-radius: 8px !important;
-        font-weight: bold;
-    }
-    .stTextInput>div>input {
-        background: #23272f !important;
-        color: #fff !important;
-        border-radius: 8px !important;
-    }
-    .stAlert {
-        border-radius: 8px !important;
-    }
-    .stExpanderHeader {
-        color: #2196F3 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Selector de tema en la barra lateral
+    with st.sidebar:
+        st.title("🎨 Configuración")
+        tema = st.selectbox(
+            "Selecciona el tema:",
+            ["🌙 Tema Oscuro", "☀️ Tema Claro"],
+            index=0
+        )
+        
+        st.markdown("---")
+        st.markdown("### 📊 Información")
+        st.markdown("**Sistema de búsqueda de placas**")
+        st.markdown("- Google Sheets")
+        st.markdown("- API RRVSAC")
+        
+        st.markdown("---")
+        st.markdown("### 🔧 Estado del Sistema")
+        if tema == "🌙 Tema Oscuro":
+            st.success("✅ Tema Oscuro Activo")
+        else:
+            st.info("☀️ Tema Claro Activo")
+    
+    # CSS dinámico según el tema seleccionado
+    if tema == "🌙 Tema Oscuro":
+        css_tema = """
+        <style>
+        body, .stApp {
+            background: #181c23 !important;
+        }
+        .main-header {
+            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: white;
+        }
+        .search-container {
+            background: #23272f;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+        .results-container {
+            background: #23272f;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #fff;
+        }
+        .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
+            background: transparent !important;
+        }
+        .stButton>button {
+            background: #e53935 !important;
+            color: #fff !important;
+            border-radius: 8px !important;
+            font-weight: bold;
+        }
+        .stTextInput>div>input {
+            background: #23272f !important;
+            color: #fff !important;
+            border-radius: 8px !important;
+        }
+        .stAlert {
+            border-radius: 8px !important;
+        }
+        .stExpanderHeader {
+            color: #2196F3 !important;
+        }
+        .stSelectbox>div>div>div {
+            background: #23272f !important;
+            color: #fff !important;
+        }
+        </style>
+        """
+    else:  # Tema Claro
+        css_tema = """
+        <style>
+        body, .stApp {
+            background: #f8f9fa !important;
+        }
+        .main-header {
+            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: white;
+        }
+        .search-container {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+        .results-container {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+        .stDataFrame, .stTable, .stMarkdown, .stMetric, .stAlert, .stExpander {
+            background: transparent !important;
+        }
+        .stButton>button {
+            background: #e53935 !important;
+            color: #fff !important;
+            border-radius: 8px !important;
+            font-weight: bold;
+        }
+        .stTextInput>div>input {
+            background: #ffffff !important;
+            color: #333 !important;
+            border-radius: 8px !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        .stAlert {
+            border-radius: 8px !important;
+        }
+        .stExpanderHeader {
+            color: #2196F3 !important;
+        }
+        .stSelectbox>div>div>div {
+            background: #ffffff !important;
+            color: #333 !important;
+        }
+        </style>
+        """
+    
+    st.markdown(css_tema, unsafe_allow_html=True)
     
     # Header principal
     st.markdown("""
