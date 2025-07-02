@@ -397,10 +397,11 @@ def main():
         color: var(--text-primary) !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
-    .main-header, .search-container, .results-container {
+    .main-header, .search-container, .status-container, .results-container {
         width: 90vw;
         max-width: 1200px;
         margin: 0.5rem auto 0.5rem auto;
+        display: block;
     }
     .main-header {
         background: var(--gradient-primary);
@@ -423,6 +424,21 @@ def main():
         opacity: 0.92;
         font-weight: 400;
         margin-bottom: 0;
+    }
+    .status-container {
+        background: var(--bg-secondary);
+        min-height: 60px;
+        border-radius: 14px;
+        box-shadow: var(--shadow-light);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+        font-size: 1.15rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
     }
     .search-container, .results-container {
         background: var(--bg-secondary);
@@ -525,6 +541,20 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
+    # Contenedor de estado (ACTIVO/NO ACTIVO EN PLATAFORMA)
+    show_status = False
+    status_html = ""
+    def etiqueta_rrvsac(valor):
+        if valor == 'ACTIVO':
+            return '<span style="background:#43a047;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
+        else:
+            return '<span style="background:#e53935;color:white;padding:8px 24px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
+
+    if 'rrvsac_status' in locals() and (('buscar_btn' in locals() and buscar_btn) or ('buscar_btn' in globals() and buscar_btn)) and placa_buscar.strip():
+        show_status = True
+        status_html = etiqueta_rrvsac(rrvsac_status)
+    st.markdown(f'<div class="status-container">{status_html if show_status else ""}</div>', unsafe_allow_html=True)
+
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
 
@@ -559,16 +589,6 @@ def main():
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
             st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
-
-    def etiqueta_rrvsac(valor):
-        if valor == 'ACTIVO':
-            return '<span style="background:#43a047;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">ACTIVO EN PLATAFORMA</span>'
-        else:
-            return '<span style="background:#e53935;color:white;padding:6px 18px;border-radius:12px;font-weight:bold;font-size:1.1em;">NO ACTIVO EN PLATAFORMA</span>'
-
-    # Mostrar etiqueta de estado solo después de la búsqueda
-    if buscar_btn and placa_buscar.strip() and 'rrvsac_status' in locals():
-        st.markdown(f'<div style="text-align:center;margin-bottom:18px;">{etiqueta_rrvsac(rrvsac_status)}</div>', unsafe_allow_html=True)
 
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales and len(st.session_state.resultados_actuales) > 0:
