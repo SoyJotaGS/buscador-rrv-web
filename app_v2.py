@@ -433,13 +433,7 @@ def main():
         margin: 0 !important;
     }
     
-    .main-container {
-        width: 100vw !important;
-        max-width: 100vw !important;
-        margin: 0 !important;
-        padding: 1.5rem 0 !important;
-        box-sizing: border-box !important;
-    }
+    /* Contenedor principal eliminado - no es necesario */
     
     .title-section {
         text-align: center;
@@ -651,8 +645,7 @@ def main():
     """
     st.markdown(css_tema, unsafe_allow_html=True)
 
-    # Contenedor principal
-    st.markdown('<div class="main-container">', unsafe_allow_html=True)
+    # Sin contenedor principal innecesario
 
     # Título y subtítulo optimizados
     st.markdown('<div class="title-section">', unsafe_allow_html=True)
@@ -769,8 +762,7 @@ def main():
         
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Cerrar contenedor principal
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Sin contenedor principal que cerrar
 
 if __name__ == "__main__":
     main()
