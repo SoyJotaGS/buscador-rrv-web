@@ -383,6 +383,8 @@ def main():
         align-items: center;
         width: 100%;
         min-height: 100vh;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
     }
     :root {
         --bg-primary: #181a20;
@@ -404,35 +406,30 @@ def main():
         color: var(--text-primary) !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
+    h1.rrv-title {
+        font-size:1.3rem;
+        font-weight:600;
+        text-align:center;
+        margin-top:0 !important;
+        margin-bottom:0.2rem;
+        color:#f1f1f1;
+        padding-top:0 !important;
+    }
+    .rrv-subtitle {
+        font-size:1rem;
+        opacity:0.92;
+        font-weight:400;
+        text-align:center;
+        margin-top:0 !important;
+        margin-bottom:1.2rem;
+        color:#b0b3c2;
+        padding-top:0 !important;
+    }
     .main-header, .search-container, .status-container, .results-container {
         width: 90vw;
         max-width: 800px;
         margin: 0.2rem 0 0.2rem 0;
         display: block;
-    }
-    .main-header {
-        background: var(--gradient-primary);
-        padding: 0.6rem 1rem;
-        border-radius: 12px;
-        text-align: center;
-        color: white;
-        box-shadow: none;
-        position: relative;
-        overflow: hidden;
-        margin-top: 0.2rem;
-        margin-bottom: 0.2rem;
-    }
-    .main-header h1 {
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin-bottom: 0.2rem;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.08);
-    }
-    .main-header p {
-        font-size: 1rem;
-        opacity: 0.92;
-        font-weight: 400;
-        margin-bottom: 0;
     }
     .status-container {
         background: var(--bg-secondary);
@@ -544,9 +541,9 @@ def main():
     st.markdown(css_tema, unsafe_allow_html=True)
     st.markdown('<div class="rrv-wrapper">', unsafe_allow_html=True)
 
-    # Título y subtítulo sin contenedor visual
-    st.markdown('<h1 style="font-size:1.3rem;font-weight:600;text-align:center;margin-bottom:0.2rem;color:#f1f1f1;">🔍 BUSCADOR RRV</h1>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:1rem;opacity:0.92;font-weight:400;text-align:center;margin-bottom:1.2rem;color:#b0b3c2;">Consultas de base de datos y plataforma</div>', unsafe_allow_html=True)
+    # Título y subtítulo sin contenedor visual, sin margen superior
+    st.markdown('<h1 class="rrv-title">🔍 BUSCADOR RRV</h1>', unsafe_allow_html=True)
+    st.markdown('<div class="rrv-subtitle">Consultas de base de datos y plataforma</div>', unsafe_allow_html=True)
 
     # Inicializar la aplicación
     app = BuscadorPlacasWeb()
