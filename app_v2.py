@@ -241,8 +241,6 @@ class BuscadorPlacasWeb:
         
         return resultados_ordenados
     
-
-    
     def crear_excel_bytes(self, resultado):
         """Crea un archivo Excel en memoria y devuelve los bytes"""
         try:
@@ -335,7 +333,6 @@ class BuscadorPlacasWeb:
             wb.close()
             
             return output.getvalue()
-            
         except Exception as e:
             st.error(f"Error al crear archivo Excel: {str(e)}")
             return None
@@ -426,7 +423,7 @@ def main():
         if not resultados_ordenados:
             st.warning("⚠️ No se encontró esta placa en el sistema")
         else:
-            st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s) ordenados cronológicamente")
+            st.success(f"✅ Se encontraron {len(resultados_ordenados)} registro(s)")
     
     # Mostrar resultados si existen
     if st.session_state.resultados_actuales:
@@ -436,12 +433,10 @@ def main():
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            st.subheader("📊 Resultados Encontrados (Ordenados Cronológicamente)")
+            st.subheader("📊 Resultados Encontrados")
         
         with col2:
             st.metric("Total Registros", len(st.session_state.resultados_actuales))
-        
-
         
         # Crear DataFrame para mostrar los resultados
         df_resultados = pd.DataFrame([
@@ -450,7 +445,7 @@ def main():
                 'PLACA': resultado['placa'],
                 'EMPRESA': resultado['empresa'],
                 'ÚLTIMO ESTADO': resultado['trabajo'],
-                'SERVICIO': resultado['pestana'],
+                'SISTEMA': resultado['sistema'],
                 'HOJA': resultado['hoja']
             }
             for resultado in st.session_state.resultados_actuales
@@ -463,12 +458,8 @@ def main():
             hide_index=True
         )
         
-
-        
-
-        
         # Mostrar detalles expandibles
-        st.subheader("🔍 Detalles Completos (Ordenados por Fecha)")
+        st.subheader("🔍 Detalles Completos")
         
         for i, resultado in enumerate(st.session_state.resultados_actuales):
             # Determinar el orden cronológico
@@ -482,7 +473,7 @@ def main():
                 with col1:
                     st.markdown("**📍 Ubicación del Registro**")
                     st.write(f"**Hoja:** {resultado['hoja']}")
-                    st.write(f"**Pestaña:** {resultado['pestana']}")
+                    st.write(f"**Sistema:** {resultado['sistema']}")
                     st.write(f"**Fila:** {resultado['fila']}")
                 
                 with col2:
